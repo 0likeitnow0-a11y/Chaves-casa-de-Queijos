@@ -707,6 +707,58 @@
             }
         }
         
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #8B4513;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Mensagem de erro */
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+            text-align: center;
+        }
+        
+        .error-message button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
         /* Responsividade do checkout */
         @media (max-width: 768px) {
             .form-row {
@@ -759,53 +811,178 @@
             }
         }
     </style>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { 
+            getFirestore, 
+            collection, 
+            getDocs, 
+            query, 
+            where, 
+            addDoc, 
+            serverTimestamp,
+            onSnapshot
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // CONFIGURAÇÃO DO FIREBASE - SUBSTITUA COM SUAS CREDENCIAIS
+        const firebaseConfig = {
+            apiKey: "AIzaSyCwKv4tLYz8Wv3P6Y3vBc9bJ7sX8r5tN9oM",
+            authDomain: "queijos-delicia.firebaseapp.com",
+            projectId: "queijos-delicia",
+            storageBucket: "queijos-delicia.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef1234567890abcdef"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Função para carregar queijos do Firestore
+        async function loadCheesesFromFirebase() {
+            try {
+                showLoading();
+                const cheeses = [];
+                const q = query(
+                    collection(db, "produtos"),
+                    where("ativo", "==", true)
+                );
+
+                const snapshot = await getDocs(q);
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    cheeses.push({
+                        id: doc.id,
+                        name: data.nome || data.name,
+                        description: data.descricao || data.description,
+                        price: parseFloat(data.preco) || parseFloat(data.price) || 0,
+                        icon: data.icone || data.icon || "🧀",
+                        category: data.categoria || data.category || "nacional",
+                        weight: data.peso || data.weight || "500g"
+                    });
+                });
+
+                hideLoading();
+                return cheeses;
+            } catch (error) {
+                hideLoading();
+                console.error("Erro ao carregar queijos do Firebase:", error);
+                showError("Erro ao carregar produtos. Usando dados locais como backup.");
+                return loadCheesesData();
+            }
+        }
+
+        // Função para salvar pedido no Firebase
+        async function saveOrderToFirebase(orderData) {
+            try {
+                showLoading();
+                const ordersRef = collection(db, "pedidos");
+                
+                // Formatar dados para Firebase
+                const firebaseOrder = {
+                    numeroPedido: orderData.id,
+                    cliente: {
+                        nome: orderData.customer.name,
+                        telefone: orderData.customer.phone,
+                        whatsapp: orderData.customer.whatsapp || "",
+                        tipoEntrega: orderData.customer.type,
+                        endereco: orderData.customer.type === 'delivery' ? {
+                            cep: orderData.customer.cep,
+                            logradouro: orderData.customer.address,
+                            bairro: orderData.customer.neighborhood,
+                            cidade: orderData.customer.city,
+                            complemento: orderData.customer.complement || "",
+                            referencia: orderData.customer.reference || ""
+                        } : null
+                    },
+                    itens: orderData.items.map(item => ({
+                        produtoId: item.id,
+                        nome: item.name,
+                        preco: item.price,
+                        quantidade: item.quantity,
+                        total: item.total
+                    })),
+                    resumo: {
+                        subtotal: orderData.subtotal,
+                        taxaEntrega: orderData.deliveryFee,
+                        desconto: orderData.discount,
+                        total: orderData.total
+                    },
+                    pagamento: {
+                        metodo: orderData.paymentMethod,
+                        status: "pendente"
+                    },
+                    status: "pendente",
+                    observacoes: "",
+                    dataCriacao: serverTimestamp(),
+                    dataAtualizacao: serverTimestamp()
+                };
+
+                const docRef = await addDoc(ordersRef, firebaseOrder);
+                hideLoading();
+                
+                console.log("Pedido salvo no Firebase com ID: ", docRef.id);
+                return { ...orderData, firebaseId: docRef.id };
+                
+            } catch (error) {
+                hideLoading();
+                console.error("Erro ao salvar pedido no Firebase:", error);
+                showError("Erro ao salvar pedido. Salvando localmente como backup.");
+                throw error;
+            }
+        }
+
+        // Função para mostrar/ocultar loading
+        function showLoading() {
+            const spinner = document.getElementById('loadingSpinner');
+            if (spinner) spinner.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            const spinner = document.getElementById('loadingSpinner');
+            if (spinner) spinner.style.display = 'none';
+        }
+
+        // Função para mostrar erro
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `
+                <p>${message}</p>
+                <button onclick="this.parentElement.remove()">OK</button>
+            `;
+            
+            const container = document.querySelector('.container');
+            if (container) {
+                container.insertBefore(errorDiv, container.firstChild);
+                
+                // Remover automaticamente após 5 segundos
+                setTimeout(() => {
+                    if (errorDiv.parentNode) {
+                        errorDiv.remove();
+                    }
+                }, 5000);
+            }
+        }
+
+        // Exportar funções para o escopo global
+        window.loadCheesesFromFirebase = loadCheesesFromFirebase;
+        window.saveOrderToFirebase = saveOrderToFirebase;
+        window.db = db;
+        window.showLoading = showLoading;
+        window.hideLoading = hideLoading;
+    </script>
 </head>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import {
-    getFirestore,
-    collection,
-    getDocs,
-    query,
-    where
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "SEU_PROJECT_ID.firebaseapp.com",
-    projectId: "SEU_PROJECT_ID"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  async function loadCheesesFromFirebase() {
-    const cheeses = [];
-    const q = query(
-      collection(db, "produtos"),
-      where("ativo", "==", true)
-    );
-
-    const snapshot = await getDocs(q);
-
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      cheeses.push({
-        id: doc.id,
-        name: data.nome,
-        description: data.descricao,
-        price: data.preco,
-        icon: data.icon || "🧀",
-        category: data.categoria || "nacional"
-      });
-    });
-
-    return cheeses;
-  }
-
-  window.loadCheesesFromFirebase = loadCheesesFromFirebase;
-</script>
 <body>
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+        <p>Carregando...</p>
+    </div>
+
     <!-- Header -->
     <header>
         <div class="container header-container">
@@ -845,7 +1022,11 @@
             <h2 class="section-title">Nossos Queijos</h2>
             
             <div class="cheeses-grid" id="cheesesGrid">
-                <!-- Queijos serão inseridos aqui via JavaScript -->
+                <!-- Queijos serão carregados do Firebase -->
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                    <div class="spinner" style="margin: 0 auto 20px;"></div>
+                    <p>Carregando queijos...</p>
+                </div>
             </div>
         </div>
     </section>
@@ -1187,92 +1368,75 @@
             }
         }
         
-        // ===== DADOS DOS QUEIJOS - SISTEMA DE SINCRONIZAÇÃO =====
+        // ===== DADOS DOS QUEIJOS - SISTEMA COM FIREBASE =====
         
-        // Dados dos queijos - COM VERIFICAÇÃO DE SINCRONIZAÇÃO
-        function loadCheesesData() {
+        // Dados dos queijos - COM FALLBACK
+        async function loadCheesesData() {
+            try {
+                // Primeiro tenta carregar do Firebase
+                const firebaseCheeses = await window.loadCheesesFromFirebase();
+                if (firebaseCheeses && firebaseCheeses.length > 0) {
+                    console.log(`Carregados ${firebaseCheeses.length} queijos do Firebase`);
+                    return firebaseCheeses;
+                }
+            } catch (error) {
+                console.log("Usando dados locais como fallback");
+            }
+            
+            // Fallback para dados locais
             const storedCheeses = JSON.parse(localStorage.getItem('queijosDeliciaCheeses'));
             
             if (storedCheeses && storedCheeses.length > 0) {
-                // Garantir que todos os queijos tenham os campos necessários
                 return storedCheeses.map(cheese => ({
-                    id: cheese.id || 0,
+                    id: cheese.id || 'local-' + Math.random().toString(36).substr(2, 9),
                     name: cheese.name || 'Queijo',
                     description: cheese.description || 'Descrição não disponível',
                     price: cheese.price || 0,
                     icon: cheese.icon || '🧀',
-                    category: cheese.category || 'nacional'
+                    category: cheese.category || 'nacional',
+                    weight: cheese.weight || '500g'
                 }));
             } else {
-                // Dados padrão com IDs consistentes
+                // Dados padrão
                 const defaultCheeses = [
                     {
-                        id: 1,
+                        id: 'minas-frescal',
                         name: "Queijo Minas Frescal",
                         description: "Tradicional queijo mineiro, leve e de sabor suave. Perfeito para o café da manhã.",
                         price: 24.90,
                         icon: "🥛",
-                        category: "nacional"
+                        category: "nacional",
+                        weight: "500g"
                     },
                     {
-                        id: 2,
+                        id: 'prato',
                         name: "Queijo Prato",
                         description: "Queijo amarelo de sabor suave e textura macia. Ideal para sanduíches e lanches.",
                         price: 32.50,
                         icon: "🧀",
-                        category: "nacional"
+                        category: "nacional",
+                        weight: "500g"
                     },
                     {
-                        id: 3,
+                        id: 'canastra',
                         name: "Queijo Canastra",
                         description: "Queijo artesanal mineiro com sabor marcante e textura única. Feito com leite cru.",
                         price: 56.90,
                         icon: "🏞️",
-                        category: "artesanal"
+                        category: "artesanal",
+                        weight: "500g"
                     },
                     {
-                        id: 4,
+                        id: 'gouda',
                         name: "Queijo Gouda",
                         description: "Queijo holandês de sabor adocicado e textura cremosa. Maturado por 6 meses.",
                         price: 67.80,
                         icon: "🇳🇱",
-                        category: "importado"
-                    },
-                    {
-                        id: 5,
-                        name: "Queijo Brie",
-                        description: "Queijo francês de casca branca e mofada, cremoso e de sabor delicado.",
-                        price: 72.40,
-                        icon: "🇫🇷",
-                        category: "importado"
-                    },
-                    {
-                        id: 6,
-                        name: "Queijo Parmesão",
-                        description: "Queijo italiano duro e granular, sabor intenso. Perfeito para ralar sobre massas.",
-                        price: 88.90,
-                        icon: "🍝",
-                        category: "importado"
-                    },
-                    {
-                        id: 7,
-                        name: "Queijo Coalho",
-                        description: "Típico do Nordeste brasileiro, perfeito para assar na brasa. Sabor suave e textura firme.",
-                        price: 28.70,
-                        icon: "🔥",
-                        category: "nacional"
-                    },
-                    {
-                        id: 8,
-                        name: "Queijo Provolone",
-                        description: "Queijo italiano defumado, de sabor forte e textura firme. Ideal para petiscos.",
-                        price: 61.30,
-                        icon: "🇮🇹",
-                        category: "importado"
+                        category: "importado",
+                        weight: "500g"
                     }
                 ];
                 
-                // Salvar dados padrão no localStorage (para primeira execução)
                 localStorage.setItem('queijosDeliciaCheeses', JSON.stringify(defaultCheeses));
                 console.log('Dados padrão salvos no localStorage');
                 
@@ -1281,7 +1445,7 @@
         }
 
         // Inicializar dados dos queijos
-        let cheeses = loadCheesesData();
+        let cheeses = [];
         
         // Carrinho de compras
         let cart = [];
@@ -1299,66 +1463,29 @@
         const checkoutBtn = document.getElementById('checkoutBtn');
         const cheesesGrid = document.getElementById('cheesesGrid');
 
-        // Inicializar a exibição dos queijos
+        // Exibir queijos na página
         async function displayCheeses() {
-  cheesesGrid.innerHTML = '';
-  cheeses = await window.loadCheesesFromFirebase();
-
-  if (cheeses.length === 0) {
-    cheesesGrid.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-        <p style="font-size: 1.2rem; color: #666;">
-          Nenhum queijo disponível no momento.
-        </p>
-      </div>
-    `;
-    return;
-  }
-
-  cheeses.forEach(cheese => {
-    const cheeseCard = document.createElement('div');
-    cheeseCard.className = 'cheese-card';
-
-    cheeseCard.innerHTML = `
-      <div class="cheese-img">${cheese.icon}</div>
-      <div class="cheese-info">
-        <h3>${cheese.name}</h3>
-        <p>${cheese.description}</p>
-        <div class="cheese-price">R$ ${cheese.price.toFixed(2)}</div>
-        <div class="cheese-actions">
-          <div class="quantity-selector">
-            <button class="quantity-btn minus" data-id="${cheese.id}">-</button>
-            <input type="number" class="quantity-input" id="qty-${cheese.id}" value="1" min="1">
-            <button class="quantity-btn plus" data-id="${cheese.id}">+</button>
-          </div>
-          <button class="btn add-to-cart" data-id="${cheese.id}">
-            Adicionar
-          </button>
-        </div>
-      </div>
-    `;
-
-    cheesesGrid.appendChild(cheeseCard);
-  });
-}
-
             cheesesGrid.innerHTML = '';
             
-            // Recarregar queijos atualizados
-            cheeses = loadCheesesData();
+            // Carregar queijos (Firebase ou local)
+            cheeses = await loadCheesesData();
             
             if (cheeses.length === 0) {
                 cheesesGrid.innerHTML = `
                     <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                        <p style="font-size: 1.2rem; color: #666;">Nenhum queijo disponível no momento.</p>
+                        <p style="font-size: 1.2rem; color: #666;">
+                            Nenhum queijo disponível no momento.
+                        </p>
                     </div>
                 `;
                 return;
             }
             
+            // Criar cards para cada queijo
             cheeses.forEach(cheese => {
                 const cheeseCard = document.createElement('div');
                 cheeseCard.className = 'cheese-card';
+                
                 cheeseCard.innerHTML = `
                     <div class="cheese-img">
                         <span style="font-size: 4rem;">${cheese.icon || '🧀'}</span>
@@ -1366,6 +1493,9 @@
                     <div class="cheese-info">
                         <h3>${cheese.name}</h3>
                         <p>${cheese.description}</p>
+                        <div style="color: #777; font-size: 0.9rem; margin-bottom: 5px;">
+                            <i class="fas fa-weight-hanging"></i> ${cheese.weight || '500g'}
+                        </div>
                         <div class="cheese-price">R$ ${cheese.price.toFixed(2)}</div>
                         <div class="cheese-actions">
                             <div class="quantity-selector">
@@ -1399,12 +1529,11 @@
 
         // Adicionar ao carrinho
         function addToCart(event) {
-            const cheeseId = parseInt(event.target.getAttribute('data-id'));
+            const cheeseId = event.target.getAttribute('data-id');
             const quantityInput = document.getElementById(`qty-${cheeseId}`);
             const quantity = parseInt(quantityInput.value) || 1;
             
-            // Carregar queijos atualizados
-            cheeses = loadCheesesData();
+            // Encontrar o queijo na lista
             const cheese = cheeses.find(c => c.id === cheeseId);
             
             if (!cheese) {
@@ -1445,7 +1574,7 @@
 
         // Aumentar quantidade
         function increaseQuantity(event) {
-            const cheeseId = parseInt(event.target.getAttribute('data-id'));
+            const cheeseId = event.target.getAttribute('data-id');
             const quantityInput = document.getElementById(`qty-${cheeseId}`);
             let quantity = parseInt(quantityInput.value) || 1;
             
@@ -1457,7 +1586,7 @@
 
         // Diminuir quantidade
         function decreaseQuantity(event) {
-            const cheeseId = parseInt(event.target.getAttribute('data-id'));
+            const cheeseId = event.target.getAttribute('data-id');
             const quantityInput = document.getElementById(`qty-${cheeseId}`);
             let quantity = parseInt(quantityInput.value) || 1;
             
@@ -1494,7 +1623,7 @@
                             <div class="cart-item-price">R$ ${item.price.toFixed(2)} x ${item.quantity}</div>
                         </div>
                         <div>
-                            <button class="btn remove-item" data-id="${item.id}" style="padding: 8px 15px; font-size: 0.9rem;">Remover</button>
+                            <button class="btn remove-item" data-id="${item.id}" style="padding: 8px 15px; font-size: 0.9rem; background: #dc3545;">Remover</button>
                         </div>
                     `;
                     
@@ -1513,7 +1642,7 @@
 
         // Remover do carrinho
         function removeFromCart(event) {
-            const cheeseId = parseInt(event.target.getAttribute('data-id'));
+            const cheeseId = event.target.getAttribute('data-id');
             
             // Remover item do carrinho
             cart = cart.filter(item => item.id !== cheeseId);
@@ -1522,7 +1651,7 @@
             updateCart();
         }
 
-        // Sistema de checkout atualizado
+        // Sistema de checkout
         function checkout() {
             if (cart.length === 0) {
                 alert('Seu carrinho está vazio. Adicione itens antes de finalizar a compra.');
@@ -1788,32 +1917,29 @@
         }
 
         // Salvar pedido
-        function saveOrder(orderData) {
-            // Carregar pedidos existentes
-            const orders = JSON.parse(localStorage.getItem('queijosDeliciaOrders')) || [];
-            
-            // Adicionar novo pedido
-            orders.push(orderData);
-            
-            // Salvar no localStorage
-            localStorage.setItem('queijosDeliciaOrders', JSON.stringify(orders));
-            
-            // Criar notificação para o admin
-            const notifications = JSON.parse(localStorage.getItem('queijosDeliciaNotifications')) || [];
-            notifications.unshift({
-                id: notifications.length + 1,
-                title: "Novo pedido recebido",
-                message: `Pedido #${orderData.id} de ${orderData.customer.name} - R$ ${orderData.total.toFixed(2)}`,
-                time: new Date().toISOString().replace('T', ' ').substring(0, 16),
-                read: false
-            });
-            
-            localStorage.setItem('queijosDeliciaNotifications', JSON.stringify(notifications));
-            
-            // Limpar carrinho
-            cart = [];
-            updateCart();
-            localStorage.removeItem('queijosDeliciaCart');
+        async function saveOrder(orderData) {
+            try {
+                // Tentar salvar no Firebase
+                const savedOrder = await window.saveOrderToFirebase(orderData);
+                
+                // Também salvar localmente como backup
+                const orders = JSON.parse(localStorage.getItem('queijosDeliciaOrders')) || [];
+                orders.push(savedOrder);
+                localStorage.setItem('queijosDeliciaOrders', JSON.stringify(orders));
+                
+                console.log("Pedido salvo com sucesso:", savedOrder);
+                return savedOrder;
+                
+            } catch (error) {
+                console.error("Erro ao salvar pedido no Firebase, salvando localmente:", error);
+                
+                // Fallback para apenas localStorage
+                const orders = JSON.parse(localStorage.getItem('queijosDeliciaOrders')) || [];
+                orders.push(orderData);
+                localStorage.setItem('queijosDeliciaOrders', JSON.stringify(orders));
+                
+                return orderData;
+            }
         }
 
         // Mostrar confirmação do pedido
@@ -1863,28 +1989,43 @@
         }
 
         // Confirmar pedido
-        document.getElementById('confirmOrderBtn').addEventListener('click', function() {
+        document.getElementById('confirmOrderBtn').addEventListener('click', async function() {
             // Validar formulário
             if (!validateCheckoutForm()) {
                 return;
             }
             
-            // Coletar dados do cliente
-            const isDelivery = document.querySelector('.delivery-option.selected').dataset.type === 'delivery';
-            const customerData = isDelivery ? collectDeliveryData() : collectPickupData();
+            // Desabilitar botão para evitar múltiplos cliques
+            const confirmBtn = this;
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
             
-            // Coletar dados do pedido
-            const orderData = collectOrderData(customerData);
-            
-            // Salvar pedido
-            saveOrder(orderData);
-            
-            // Mostrar confirmação
-            showOrderConfirmation(orderData);
-            
-            // Salvar telefone para futuras compras
-            if (customerData.phone) {
-                localStorage.setItem('queijosDeliciaCustomerPhone', customerData.phone);
+            try {
+                // Coletar dados do cliente
+                const isDelivery = document.querySelector('.delivery-option.selected').dataset.type === 'delivery';
+                const customerData = isDelivery ? collectDeliveryData() : collectPickupData();
+                
+                // Coletar dados do pedido
+                const orderData = collectOrderData(customerData);
+                
+                // Salvar pedido (Firebase + local)
+                const savedOrder = await saveOrder(orderData);
+                
+                // Mostrar confirmação
+                showOrderConfirmation(savedOrder);
+                
+                // Salvar telefone para futuras compras
+                if (customerData.phone) {
+                    localStorage.setItem('queijosDeliciaCustomerPhone', customerData.phone);
+                }
+                
+            } catch (error) {
+                alert('Erro ao processar pedido. Por favor, tente novamente.');
+                console.error('Erro no processamento do pedido:', error);
+            } finally {
+                // Reabilitar botão
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirmar Pedido';
             }
         });
 
@@ -1914,7 +2055,6 @@
             cartModal.classList.remove('active');
         });
 
-        // Substituir o antigo checkout pela nova função
         checkoutBtn.addEventListener('click', checkout);
 
         // Fechar carrinho ao clicar fora
@@ -1933,7 +2073,7 @@
             }
         }
 
-        // Acesso à área admin com verificação de segurança
+        // Acesso à área admin
         function accessAdminArea() {
             // Verificar se há sessão ativa
             const isLoggedIn = localStorage.getItem('queijosDeliciaLoggedIn') === 'true' || 
@@ -1971,36 +2111,28 @@
             }
         }
 
-        // ===== SISTEMA DE SINCRONIZAÇÃO COM PAINEL ADMIN =====
+        // ===== SISTEMA DE ATUALIZAÇÃO EM TEMPO REAL =====
         
-        // Sincronizar com painel admin
-        function syncWithAdminPanel() {
-            // Verificar se o painel admin atualizou os dados
-            const lastAdminUpdate = localStorage.getItem('queijosDeliciaLastAdminUpdate');
-            const lastSiteUpdate = localStorage.getItem('queijosDeliciaLastSiteUpdate') || 0;
-            
-            if (lastAdminUpdate && parseInt(lastAdminUpdate) > parseInt(lastSiteUpdate)) {
-                // Recarregar queijos se houve atualização no painel
+        // Sincronizar queijos periodicamente
+        async function syncCheeses() {
+            try {
                 const oldCheeseCount = cheeses.length;
-                cheeses = loadCheesesData();
+                const newCheeses = await window.loadCheesesFromFirebase();
                 
-                if (oldCheeseCount !== cheeses.length) {
-                    // Se o número de queijos mudou, atualizar display
-                    displayCheeses();
+                if (newCheeses.length !== oldCheeseCount) {
+                    // Atualizar lista de queijos
+                    cheeses = newCheeses;
+                    await displayCheeses();
                     
                     // Mostrar notificação
                     showUpdateNotification();
                     console.log(`Cardápio atualizado! Agora temos ${cheeses.length} queijos.`);
                 }
-                
-                // Atualizar timestamp do site
-                localStorage.setItem('queijosDeliciaLastSiteUpdate', Date.now().toString());
-                
-                return true;
+            } catch (error) {
+                console.error('Erro na sincronização:', error);
             }
-            return false;
         }
-        
+
         // Mostrar notificação de atualização
         function showUpdateNotification() {
             // Verificar se já existe uma notificação
@@ -2031,31 +2163,23 @@
                 }
             }, 5000);
         }
-        
-        // Marcar atualização (usado pelo painel admin)
-        function markUpdate() {
-            localStorage.setItem('queijosDeliciaLastUpdate', new Date().getTime().toString());
-        }
-        
+
         // Inicializar aplicativo
-        function initApp() {
+        async function initApp() {
             adjustForMobile();
             
-            // Sincronizar com painel admin antes de mostrar
-            syncWithAdminPanel();
+            // Carregar e exibir queijos
+            await displayCheeses();
             
-            displayCheeses();
+            // Carregar carrinho salvo
             loadSavedCart();
             updateCart();
             
             // Inicializar informações de pagamento
             document.getElementById('paymentMethod').dispatchEvent(new Event('change'));
             
-            // Verificar sincronização periodicamente (a cada 10 segundos)
-            setInterval(syncWithAdminPanel, 10000);
-            
-            // Marcar inicialização
-            markUpdate();
+            // Sincronizar queijos periodicamente (a cada 30 segundos)
+            setInterval(syncCheeses, 30000);
             
             // Log de inicialização
             console.log('Aplicativo iniciado com', cheeses.length, 'queijos');

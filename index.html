@@ -760,6 +760,51 @@
         }
     </style>
 </head>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    query,
+    where
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_PROJECT_ID.firebaseapp.com",
+    projectId: "SEU_PROJECT_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  async function loadCheesesFromFirebase() {
+    const cheeses = [];
+    const q = query(
+      collection(db, "produtos"),
+      where("ativo", "==", true)
+    );
+
+    const snapshot = await getDocs(q);
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      cheeses.push({
+        id: doc.id,
+        name: data.nome,
+        description: data.descricao,
+        price: data.preco,
+        icon: data.icon || "🧀",
+        category: data.categoria || "nacional"
+      });
+    });
+
+    return cheeses;
+  }
+
+  window.loadCheesesFromFirebase = loadCheesesFromFirebase;
+</script>
 <body>
     <!-- Header -->
     <header>
@@ -1255,7 +1300,48 @@
         const cheesesGrid = document.getElementById('cheesesGrid');
 
         // Inicializar a exibição dos queijos
-        function displayCheeses() {
+        async function displayCheeses() {
+  cheesesGrid.innerHTML = '';
+  cheeses = await window.loadCheesesFromFirebase();
+
+  if (cheeses.length === 0) {
+    cheesesGrid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+        <p style="font-size: 1.2rem; color: #666;">
+          Nenhum queijo disponível no momento.
+        </p>
+      </div>
+    `;
+    return;
+  }
+
+  cheeses.forEach(cheese => {
+    const cheeseCard = document.createElement('div');
+    cheeseCard.className = 'cheese-card';
+
+    cheeseCard.innerHTML = `
+      <div class="cheese-img">${cheese.icon}</div>
+      <div class="cheese-info">
+        <h3>${cheese.name}</h3>
+        <p>${cheese.description}</p>
+        <div class="cheese-price">R$ ${cheese.price.toFixed(2)}</div>
+        <div class="cheese-actions">
+          <div class="quantity-selector">
+            <button class="quantity-btn minus" data-id="${cheese.id}">-</button>
+            <input type="number" class="quantity-input" id="qty-${cheese.id}" value="1" min="1">
+            <button class="quantity-btn plus" data-id="${cheese.id}">+</button>
+          </div>
+          <button class="btn add-to-cart" data-id="${cheese.id}">
+            Adicionar
+          </button>
+        </div>
+      </div>
+    `;
+
+    cheesesGrid.appendChild(cheeseCard);
+  });
+}
+
             cheesesGrid.innerHTML = '';
             
             // Recarregar queijos atualizados

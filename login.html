@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Login - Queijos Delícia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* CONTAINER PRINCIPAL RESPONSIVO */
+        .login-container {
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        /* LOGO - ADAPTATIVA */
+        .logo-area {
+            text-align: center;
+            padding: 20px 0 30px;
+            flex-shrink: 0;
+        }
+        
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .logo i {
+            font-size: clamp(2rem, 8vw, 3rem);
+        }
+        
+        .logo h1 {
+            font-size: clamp(1.5rem, 6vw, 2.2rem);
+            font-weight: 700;
+        }
+        
+        .logo span {
+            color: #FFD700;
+        }
+        
+        /* CARTÃO DE LOGIN - RESPONSIVO */
+        .login-card {
+            background-color: white;
+            border-radius: 20px;
+            padding: clamp(20px, 5vw, 40px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+            margin: 0 auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        /* TÍTULO DO FORMULÁRIO */
+        .login-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .login-title h2 {
+            font-size: clamp(1.5rem, 5vw, 1.8rem);
+            margin-bottom: 10px;
+            color: #8B4513;
+        }
+        
+        .login-title p {
+            color: #666;
+            font-size: clamp(0.9rem, 3vw, 1rem);
+        }
+        
+        /* FORMULÁRIO - TOTALMENTE RESPONSIVO */
+        .login-form {
+            width: 100%;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: clamp(0.9rem, 3.5vw, 1rem);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: clamp(1rem, 4vw, 1.1rem);
+            transition: border-color 0.3s;
+            background-color: #f9f9f9;
+            -webkit-appearance: none;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #8B4513;
+            background-color: white;
+        }
+        
+        /* BOTÕES RESPONSIVOS */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background-color: #8B4513;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: clamp(1rem, 4vw, 1.1rem);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            -webkit-appearance: none;
+        }
+        
+        .btn:hover, .btn:active {
+            background-color: #5D2906;
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-loading {
+            background-color: #5D2906;
+        }
+        
+        .btn-loading i {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* AVISO DE SEGURANÇA */
+        .security-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
+            text-align: center;
+        }
+        
+        .security-warning i {
+            color: #ff6b6b;
+            margin-right: 8px;
+        }
+        
+        /* LEMBRAR DE MIM */
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            font-size: clamp(0.9rem, 3vw, 1rem);
+        }
+        
+        .remember-me input {
+            width: auto;
+            transform: scale(1.2);
+        }
+        
+        /* MOSTRAR SENHA */
+        .show-password {
+            text-align: right;
+            margin-top: 5px;
+        }
+        
+        .show-password a {
+            color: #8B4513;
+            text-decoration: none;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* LINKS */
+        .login-links {
+            text-align: center;
+            margin-top: 20px;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
+        }
+        
+        .login-links a {
+            color: #8B4513;
+            text-decoration: none;
+            display: block;
+            margin: 10px 0;
+        }
+        
+        .login-links a:hover {
+            text-decoration: underline;
+        }
+        
+        /* MENSAGENS DE ERRO/SUCESSO */
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: clamp(0.9rem, 3.5vw, 1rem);
+            display: none;
+        }
+        
+        .message.error {
+            background-color: #ffe6e6;
+            color: #d32f2f;
+            border: 1px solid #ffcdd2;
+        }
+        
+        .message.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        
+        /* AUTO LOGOUT */
+        .auto-logout {
+            font-size: clamp(0.7rem, 2.5vw, 0.8rem);
+            color: #666;
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        
+        /* RODAPÉ */
+        .login-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #777;
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
+            flex-shrink: 0;
+        }
+        
+        /* VOLTAR AO SITE */
+        .back-to-site {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+        
+        .back-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        /* ANIMAÇÃO SHAKE */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        /* MEDIA QUERIES ESPECÍFICAS */
+        @media (max-width: 320px) {
+            .login-container {
+                padding: 10px;
+            }
+            
+            .login-card {
+                padding: 20px;
+                border-radius: 15px;
+            }
+            
+            .form-control, .btn {
+                padding: 12px;
+            }
+            
+            .back-to-site {
+                top: 10px;
+                left: 10px;
+            }
+        }
+        
+        @media (max-height: 500px) and (orientation: landscape) {
+            .login-container {
+                padding: 10px;
+                justify-content: flex-start;
+                overflow-y: auto;
+            }
+            
+            .logo-area {
+                padding: 10px 0;
+            }
+            
+            .login-card {
+                margin: 10px auto;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            .back-to-site {
+                position: absolute;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .login-container {
+                justify-content: center;
+                align-items: center;
+            }
+            
+            .login-card {
+                max-width: 450px;
+                padding: 40px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .login-card {
+                max-width: 500px;
+                padding: 50px;
+            }
+        }
+        
+        /* Evitar zoom em inputs no iOS */
+        @media screen and (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+        
+        /* Ajuste para Safari iOS */
+        @supports (-webkit-touch-callout: none) {
+            .login-container {
+                min-height: -webkit-fill-available;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Botão voltar -->
+    <div class="back-to-site">
+        <a href="index.html" class="back-btn" title="Voltar ao site">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+    </div>
+    
+    <div class="login-container">
+        <div class="logo-area">
+            <a href="index.html" class="logo">
+                <i class="fas fa-cheese"></i>
+                <h1>Queijos <span>Delícia</span></h1>
+            </a>
+        </div>
+        
+        <div class="login-card">
+            <div class="security-warning" id="securityWarning">
+                <i class="fas fa-shield-alt"></i>
+                Área restrita. Acesso apenas para administradores autorizados.
+            </div>
+            
+            <div class="login-title">
+                <h2>Área do Administrador</h2>
+                <p>Faça login para gerenciar sua loja</p>
+            </div>
+            
+            <div class="message error" id="errorMessage">
+                Credenciais inválidas. Tente novamente.
+            </div>
+            
+            <div class="message success" id="successMessage">
+                Login realizado com sucesso!
+            </div>
+            
+            <form class="login-form" id="loginForm" autocomplete="off">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" class="form-control" placeholder="seu@email.com" required autocomplete="off">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" class="form-control" placeholder="Sua senha" required autocomplete="off">
+                    <div class="show-password">
+                        <a href="#" id="showPassword">
+                            <i class="fas fa-eye"></i> Mostrar senha
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="remember-me">
+                    <input type="checkbox" id="rememberMe" checked>
+                    <label for="rememberMe">Manter-me conectado</label>
+                </div>
+                
+                <button type="submit" class="btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
+                
+                <div class="login-links">
+                    <a href="#" id="forgotPassword">Esqueci minha senha</a>
+                </div>
+            </form>
+            
+            <div class="auto-logout">
+                <i class="fas fa-clock"></i> Sessão expira após 30 minutos de inatividade
+            </div>
+            
+            <div class="login-footer">
+                <p>&copy; 2023 Queijos Delícia. Todos os direitos reservados.</p>
+                <p>Problemas de acesso? contato@queijosdelicia.com</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Verificar se já está logado (com verificação de tempo)
+        function checkLoginStatus() {
+            const isLoggedIn = localStorage.getItem('queijosDeliciaLoggedIn') === 'true' || 
+                              sessionStorage.getItem('queijosDeliciaLoggedIn') === 'true';
+            
+            if (isLoggedIn) {
+                const loginTime = localStorage.getItem('queijosDeliciaLoginTime') || 
+                                 sessionStorage.getItem('queijosDeliciaLoginTime');
+                
+                if (loginTime) {
+                    const now = new Date().getTime();
+                    const thirtyMinutes = 30 * 60 * 1000; // 30 minutos
+                    
+                    if (now - parseInt(loginTime) > thirtyMinutes) {
+                        // Sessão expirada - limpar
+                        localStorage.removeItem('queijosDeliciaLoggedIn');
+                        localStorage.removeItem('queijosDeliciaUser');
+                        localStorage.removeItem('queijosDeliciaLoginTime');
+                        sessionStorage.clear();
+                        alert('Sessão expirada. Por favor, faça login novamente.');
+                    } else {
+                        // Sessão válida - redirecionar
+                        window.location.href = 'painel-admin.html';
+                    }
+                }
+            }
+        }
+        
+        // Ajustar altura para mobile
+        function adjustMobileHeight() {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+            
+            if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                document.body.style.minHeight = '-webkit-fill-available';
+            }
+        }
+        
+        // Alternar visibilidade da senha
+        document.getElementById('showPassword').addEventListener('click', function(e) {
+            e.preventDefault();
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+                this.innerHTML = '<i class="fas fa-eye-slash"></i> Ocultar senha';
+            } else {
+                passwordInput.type = 'password';
+                icon.className = 'fas fa-eye';
+                this.innerHTML = '<i class="fas fa-eye"></i> Mostrar senha';
+            }
+        });
+        
+        // Sistema de login ATUALIZADO
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Validação básica
+            if (!email || !password) {
+                errorMessage.textContent = 'Por favor, preencha todos os campos.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Mostrar loading no botão
+            const originalText = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+            loginBtn.classList.add('btn-loading');
+            loginBtn.disabled = true;
+            
+            // Simular verificação (1.5 segundos)
+            setTimeout(() => {
+                // Buscar credenciais salvas
+                const savedCredentials = JSON.parse(localStorage.getItem('queijosDeliciaAdminCredentials')) || {
+                    email: 'admin@queijos.com',
+                    password: 'admin123' // Senha padrão inicial
+                };
+                
+                // Verificar também código de recuperação ativo
+                const tempCode = localStorage.getItem('queijosDeliciaTempCode');
+                const tempCodeTime = localStorage.getItem('queijosDeliciaTempCodeTime');
+                
+                let validCredentials = false;
+                
+                // Tentar login normal
+                if (email === savedCredentials.email && password === savedCredentials.password) {
+                    validCredentials = true;
+                }
+                // Tentar login com código de recuperação
+                else if (password === tempCode && tempCodeTime) {
+                    const now = new Date().getTime();
+                    const tenMinutes = 10 * 60 * 1000;
+                    
+                    if ((now - parseInt(tempCodeTime)) < tenMinutes) {
+                        validCredentials = true;
+                        // Limpar código após uso
+                        localStorage.removeItem('queijosDeliciaTempCode');
+                        localStorage.removeItem('queijosDeliciaTempCodeTime');
+                        
+                        // Mostrar aviso para alterar senha
+                        setTimeout(() => {
+                            alert('⚠️ LOGIN VIA CÓDIGO DE RECUPERAÇÃO\n\nPor favor, altere sua senha no painel de administração.');
+                        }, 1000);
+                    }
+                }
+                
+                if (validCredentials) {
+                    // Login bem-sucedido
+                    errorMessage.style.display = 'none';
+                    successMessage.style.display = 'block';
+                    
+                    // Salvar sessão APENAS se "manter conectado" estiver marcado
+                    const currentTime = new Date().getTime().toString();
+                    
+                    if (rememberMe) {
+                        localStorage.setItem('queijosDeliciaLoggedIn', 'true');
+                        localStorage.setItem('queijosDeliciaUser', email);
+                        localStorage.setItem('queijosDeliciaLoginTime', currentTime);
+                    } else {
+                        // Usar sessionStorage para sessão temporária
+                        sessionStorage.setItem('queijosDeliciaLoggedIn', 'true');
+                        sessionStorage.setItem('queijosDeliciaUser', email);
+                        sessionStorage.setItem('queijosDeliciaLoginTime', currentTime);
+                    }
+                    
+                    // Limpar campos sensíveis
+                    document.getElementById('password').value = '';
+                    
+                    // Inicializar dados padrão se necessário
+                    initializeDefaultData();
+                    
+                    // Redirecionar após 1 segundo
+                    setTimeout(() => {
+                        window.location.href = 'painel-admin.html';
+                    }, 1000);
+                } else {
+                    // Login falhou
+                    successMessage.style.display = 'none';
+                    errorMessage.textContent = 'Email ou senha incorretos. Tente novamente.';
+                    errorMessage.style.display = 'block';
+                    
+                    // Efeito de shake no formulário
+                    document.getElementById('loginForm').style.animation = 'shake 0.5s';
+                    setTimeout(() => {
+                        document.getElementById('loginForm').style.animation = '';
+                    }, 500);
+                    
+                    // Focar no campo de email
+                    document.getElementById('email').focus();
+                    document.getElementById('email').select();
+                    
+                    // Restaurar botão
+                    loginBtn.innerHTML = originalText;
+                    loginBtn.classList.remove('btn-loading');
+                    loginBtn.disabled = false;
+                }
+            }, 1500);
+        });
+        
+        // Inicializar dados padrão se necessário
+        function initializeDefaultData() {
+            // Garantir que os dados padrão existam
+            if (!localStorage.getItem('queijosDeliciaCheeses')) {
+                const defaultCheeses = [
+                    {
+                        id: 1,
+                        name: "Queijo Minas Frescal",
+                        price: 24.90,
+                        description: "Tradicional queijo mineiro, leve e de sabor suave. Perfeito para o café da manhã.",
+                        icon: "🥛",
+                        category: "nacional"
+                    },
+                    {
+                        id: 2,
+                        name: "Queijo Prato",
+                        price: 32.50,
+                        description: "Queijo amarelo de sabor suave e textura macia. Ideal para sanduíches e lanches.",
+                        icon: "🧀",
+                        category: "nacional"
+                    },
+                    {
+                        id: 3,
+                        name: "Queijo Canastra",
+                        price: 56.90,
+                        description: "Queijo artesanal mineiro com sabor marcante e textura única. Feito com leite cru.",
+                        icon: "🏞️",
+                        category: "artesanal"
+                    },
+                    {
+                        id: 4,
+                        name: "Queijo Gouda",
+                        price: 67.80,
+                        description: "Queijo holandês de sabor adocicado e textura cremosa. Maturado por 6 meses.",
+                        icon: "🇳🇱",
+                        category: "importado"
+                    },
+                    {
+                        id: 5,
+                        name: "Queijo Brie",
+                        price: 72.40,
+                        description: "Queijo francês de casca branca e mofada, cremoso e de sabor delicado.",
+                        icon: "🇫🇷",
+                        category: "importado"
+                    },
+                    {
+                        id: 6,
+                        name: "Queijo Parmesão",
+                        price: 88.90,
+                        description: "Queijo italiano duro e granular, sabor intenso. Perfeito para ralar sobre massas.",
+                        icon: "🍝",
+                        category: "importado"
+                    },
+                    {
+                        id: 7,
+                        name: "Queijo Coalho",
+                        price: 28.70,
+                        description: "Típico do Nordeste brasileiro, perfeito para assar na brasa. Sabor suave e textura firme.",
+                        icon: "🔥",
+                        category: "nacional"
+                    },
+                    {
+                        id: 8,
+                        name: "Queijo Provolone",
+                        price: 61.30,
+                        description: "Queijo italiano defumado, de sabor forte e textura firme. Ideal para petiscos.",
+                        icon: "🇮🇹",
+                        category: "importado"
+                    }
+                ];
+                localStorage.setItem('queijosDeliciaCheeses', JSON.stringify(defaultCheeses));
+            }
+            
+            if (!localStorage.getItem('queijosDeliciaAdminCredentials')) {
+                localStorage.setItem('queijosDeliciaAdminCredentials', JSON.stringify({
+                    email: 'admin@queijos.com',
+                    password: 'admin123'
+                }));
+            }
+            
+            if (!localStorage.getItem('queijosDeliciaSettings')) {
+                localStorage.setItem('queijosDeliciaSettings', JSON.stringify({
+                    email: "",
+                    whatsapp: "",
+                    deliveryFee: 10.00,
+                    deliveryDays: 3,
+                    defaultCity: "Taubaté"
+                }));
+            }
+        }
+        
+        // Recuperação de senha
+        document.getElementById('forgotPassword').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const email = prompt('Digite seu email de administrador para redefinir a senha:');
+            if (email) {
+                // Verificar se é o email do admin
+                const savedCredentials = JSON.parse(localStorage.getItem('queijosDeliciaAdminCredentials'));
+                const adminEmail = savedCredentials ? savedCredentials.email : 'admin@queijos.com';
+                
+                if (email === adminEmail) {
+                    // Gerar código temporário
+                    const tempCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                    localStorage.setItem('queijosDeliciaTempCode', tempCode);
+                    localStorage.setItem('queijosDeliciaTempCodeTime', new Date().getTime().toString());
+                    
+                    alert(`CÓDIGO DE RECUPERAÇÃO: ${tempCode}\n\n⚠️ GUARDE ESTE CÓDIGO!\n\nUse este código no painel admin para redefinir sua senha.\n\n⏰ O código expira em 10 minutos.`);
+                } else {
+                    alert('Email não encontrado. Entre em contato com o suporte.');
+                }
+            }
+        });
+        
+        // Limpar dados sensíveis ao carregar
+        function clearSensitiveData() {
+            // Não preencher automaticamente
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+            
+            // Limpar autocomplete
+            document.getElementById('loginForm').reset();
+            
+            // Sugerir email padrão apenas se não houver sessão
+            const isLoggedIn = localStorage.getItem('queijosDeliciaLoggedIn') === 'true' || 
+                              sessionStorage.getItem('queijosDeliciaLoggedIn') === 'true';
+            
+            if (!isLoggedIn) {
+                const savedCredentials = JSON.parse(localStorage.getItem('queijosDeliciaAdminCredentials'));
+                if (savedCredentials && savedCredentials.email) {
+                    document.getElementById('email').value = savedCredentials.email;
+                }
+            }
+        }
+        
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            adjustMobileHeight();
+            checkLoginStatus();
+            clearSensitiveData();
+            initializeDefaultData();
+            
+            // Focar no campo de email
+            setTimeout(() => {
+                document.getElementById('email').focus();
+            }, 300);
+        });
+        
+        // Ajustar altura quando a janela for redimensionada
+        window.addEventListener('resize', adjustMobileHeight);
+        window.addEventListener('orientationchange', function() {
+            setTimeout(adjustMobileHeight, 100);
+        });
+        
+        // Prevenir comportamento padrão no mobile
+        document.addEventListener('touchstart', function(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') {
+                e.target.focus();
+            }
+        });
+    </script>
+</body>
+</html>

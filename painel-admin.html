@@ -1,0 +1,2892 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Painel de Controle - Queijos Delícia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+        }
+        
+        .admin-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar - RESPONSIVO */
+        .sidebar {
+            background-color: #8B4513;
+            color: white;
+            padding: 0;
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            max-height: 60px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .sidebar.expanded {
+            max-height: 400px;
+        }
+        
+        .admin-logo {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        
+        .admin-logo h2 {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .menu-toggle {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: white;
+            padding: 5px;
+        }
+        
+        .admin-nav ul {
+            list-style: none;
+            padding: 20px 0;
+            display: none;
+            flex-direction: column;
+        }
+        
+        .sidebar.expanded .admin-nav ul {
+            display: flex;
+        }
+        
+        .admin-nav li {
+            padding: 15px 30px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: clamp(1rem, 3vw, 1.1rem);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .admin-nav li:hover, .admin-nav li.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Main Content - RESPONSIVO */
+        .main-content {
+            flex: 1;
+            padding: clamp(15px, 3vw, 20px);
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        @media (min-width: 768px) {
+            .header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+        
+        .page-title {
+            font-size: clamp(1.5rem, 5vw, 1.8rem);
+            color: #333;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: clamp(0.9rem, 3vw, 1rem);
+        }
+        
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Painéis - RESPONSIVO */
+        .panel {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: clamp(20px, 4vw, 30px);
+            margin-bottom: 25px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .panel-title {
+            font-size: clamp(1.3rem, 4vw, 1.5rem);
+            margin-bottom: 20px;
+            color: #8B4513;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        /* Formulários - RESPONSIVO */
+        .form-group {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: clamp(0.9rem, 3vw, 1rem);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: clamp(1rem, 3vw, 1.1rem);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #8B4513;
+        }
+        
+        /* Controle de senha */
+        .password-container {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .password-strength {
+            margin-top: 5px;
+            font-size: 0.85rem;
+            display: none;
+        }
+        
+        .password-strength.weak { color: #dc3545; }
+        .password-strength.medium { color: #fd7e14; }
+        .password-strength.strong { color: #28a745; }
+        
+        /* Botões */
+        .btn {
+            background-color: #8B4513;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: clamp(1rem, 3vw, 1.1rem);
+            font-weight: 600;
+            transition: background-color 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            background-color: #5D2906;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        /* Tabelas - RESPONSIVO */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .cheese-table, .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+        
+        .cheese-table th, .cheese-table td, .order-table th, .order-table td {
+            padding: clamp(10px, 2vw, 15px);
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+        }
+        
+        .cheese-table th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+            color: #555;
+            white-space: nowrap;
+        }
+        
+        .cheese-table tr:hover, .order-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .action-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .edit-btn {
+            background-color: #ffc107;
+            color: #333;
+        }
+        
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .view-btn {
+            background-color: #17a2b8;
+            color: white;
+        }
+        
+        /* Tabela de Pedidos */
+        .order-table td {
+            vertical-align: middle;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: clamp(0.75rem, 2vw, 0.8rem);
+            font-weight: 600;
+            display: inline-block;
+            text-align: center;
+            min-width: 80px;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-paid {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-delivered {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #8B4513;
+        }
+        
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card p {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        /* Modal para Adicionar/Editar Queijo - RESPONSIVO */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #777;
+            padding: 5px;
+        }
+        
+        /* Modal para detalhes do pedido */
+        .order-details-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .order-details-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .order-details-header {
+            background-color: #8B4513;
+            color: white;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-details-body {
+            padding: 25px;
+        }
+
+        .order-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .order-section-title {
+            font-size: 1.2rem;
+            color: #8B4513;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .order-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .order-info-item {
+            padding: 12px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border-left: 3px solid #8B4513;
+        }
+
+        .order-info-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .order-info-value {
+            font-weight: 600;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .order-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .order-items-table th {
+            background-color: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #ddd;
+            font-size: 0.9rem;
+        }
+
+        .order-items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9rem;
+        }
+
+        .order-items-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .order-summary-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #eee;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #ddd;
+            font-size: 0.95rem;
+        }
+
+        .summary-row.total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #8B4513;
+            border-bottom: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #ddd;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .close-order-details {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Status colors */
+        .status-pendente { color: #ff9800; font-weight: bold; }
+        .status-pago { color: #4CAF50; font-weight: bold; }
+        .status-entregue { color: #2196F3; font-weight: bold; }
+        .status-cancelado { color: #f44336; font-weight: bold; }
+
+        /* Notificações */
+        .notifications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .notification-item {
+            padding: 15px;
+            border-left: 4px solid #8B4513;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .notification-time {
+            font-size: 0.8rem;
+            color: #777;
+        }
+        
+        /* Notificações em tempo real */
+        .notifications-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 300px;
+        }
+        
+        .live-notification {
+            background-color: white;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Histórico de senhas */
+        .password-history {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        
+        .history-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9rem;
+        }
+        
+        .history-date {
+            color: #666;
+            font-size: 0.8rem;
+        }
+        
+        /* Responsividade do modal de detalhes */
+        @media (max-width: 768px) {
+            .order-info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .order-items-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .order-actions {
+                flex-direction: column;
+            }
+            
+            .order-details-content {
+                max-width: 95%;
+            }
+            
+            .order-items-table th,
+            .order-items-table td {
+                padding: 8px;
+                font-size: 0.85rem;
+            }
+        }
+        
+        /* Para tablets e desktops */
+        @media (min-width: 768px) {
+            .admin-container {
+                flex-direction: row;
+            }
+            
+            .sidebar {
+                width: 250px;
+                max-height: none;
+                height: 100vh;
+                position: fixed;
+                overflow-y: auto;
+            }
+            
+            .admin-nav ul {
+                display: flex;
+            }
+            
+            .menu-toggle {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 250px;
+                padding: 25px;
+            }
+            
+            .cheese-table, .order-table {
+                min-width: auto;
+            }
+            
+            .table-container {
+                overflow-x: visible;
+            }
+        }
+        
+        /* Para telas muito pequenas */
+        @media (max-width: 360px) {
+            .admin-logo h2 {
+                font-size: 1rem;
+            }
+            
+            .action-btns {
+                flex-direction: column;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .panel {
+                padding: 15px;
+            }
+            
+            .order-info-value {
+                font-size: 0.9rem;
+            }
+            
+            .summary-row {
+                font-size: 0.85rem;
+            }
+        }
+        
+        /* Evitar zoom em inputs no iOS */
+        @media screen and (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="admin-logo">
+                <h2><i class="fas fa-cheese"></i> Painel Admin</h2>
+                <div class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+            
+            <nav class="admin-nav">
+                <ul>
+                    <li class="active" data-tab="dashboard">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </li>
+                    <li data-tab="cheeses">
+                        <i class="fas fa-cheese"></i> Gerenciar Queijos
+                    </li>
+                    <li data-tab="orders">
+                        <i class="fas fa-shopping-cart"></i> Pedidos
+                    </li>
+                    <li data-tab="settings">
+                        <i class="fas fa-cog"></i> Configurações
+                    </li>
+                    <li data-tab="security">
+                        <i class="fas fa-shield-alt"></i> Segurança
+                    </li>
+                    <li data-tab="notifications">
+                        <i class="fas fa-bell"></i> Notificações
+                    </li>
+                    <li onclick="backupData()">
+                        <i class="fas fa-database"></i> Backup
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        
+        <!-- Conteúdo Principal -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title" id="pageTitle">Dashboard</h1>
+                <div class="user-info">
+                    <span id="currentDate"></span>
+                    <button class="logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Dashboard -->
+            <div id="dashboard" class="tab-content active">
+                <div class="panel">
+                    <h2 class="panel-title">Visão Geral</h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Total de Vendas</h3>
+                            <p>R$ <span id="totalSales">0,00</span></p>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <h3>Pedidos Hoje</h3>
+                            <p id="todayOrders">0</p>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <h3>Queijos Cadastrados</h3>
+                            <p id="cheeseCount">0</p>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <h3>Pedidos Pendentes</h3>
+                            <p id="pendingOrders">0</p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #f0f8ff; border-radius: 8px;">
+                        <h3 style="color: #8B4513; margin-bottom: 10px;">
+                            <i class="fas fa-info-circle"></i> Status do Sistema
+                        </h3>
+                        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <p><strong>Queijos sincronizados:</strong> <span id="syncStatus" style="color: #28a745;">✓</span></p>
+                                <p><strong>Último backup:</strong> <span id="lastBackup">Nunca</span></p>
+                                <p><strong>Armazenamento usado:</strong> <span id="storageUsed">0 KB</span></p>
+                            </div>
+                            <div style="flex: 1; min-width: 200px;">
+                                <p><strong>Usuário logado:</strong> <span id="loggedUser">admin</span></p>
+                                <p><strong>Sessão expira em:</strong> <span id="sessionExpiry">--:--</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin-top: 25px;">Instruções Rápidas</h3>
+                    <ul style="margin-top: 15px; padding-left: 20px;">
+                        <li style="margin-bottom: 10px;">Para adicionar um novo queijo, vá em <strong>"Gerenciar Queijos"</strong> e clique em "Adicionar Queijo"</li>
+                        <li style="margin-bottom: 10px;">Para editar um queijo existente, clique no botão <strong>"Editar"</strong> na tabela de queijos</li>
+                        <li style="margin-bottom: 10px;">Para visualizar os pedidos, vá em <strong>"Pedidos"</strong> e clique em "Ver"</li>
+                        <li style="margin-bottom: 10px;">Para alterar sua senha, vá em <strong>"Segurança"</strong></li>
+                        <li style="margin-bottom: 10px;">Faça <strong>backup regular</strong> dos dados clicando no item "Backup" no menu</li>
+                    </ul>
+                </div>
+                
+                <div class="panel">
+                    <h2 class="panel-title">Exportar Dados</h2>
+                    <p>Exporte os dados dos pedidos para diferentes formatos:</p>
+                    <div style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px;">
+                        <button class="btn" onclick="exportData('excel')">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+                        <button class="btn" onclick="exportData('csv')">
+                            <i class="fas fa-file-csv"></i> CSV
+                        </button>
+                        <button class="btn" onclick="printOrders()">
+                            <i class="fas fa-print"></i> Imprimir
+                        </button>
+                        <button class="btn" onclick="backupData()">
+                            <i class="fas fa-download"></i> Backup Completo
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gerenciar Queijos -->
+            <div id="cheeses" class="tab-content">
+                <div class="panel">
+                    <h2 class="panel-title">Gerenciar Queijos <small style="font-size: 0.9rem; color: #666; margin-left: 10px;">Total: <span id="cheeseCountTitle">0</span> queijos</small></h2>
+                    <button class="btn" onclick="openCheeseModal()" style="margin-bottom: 20px;">
+                        <i class="fas fa-plus"></i> Adicionar Queijo
+                    </button>
+                    
+                    <div style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                        <input type="text" id="searchCheese" class="form-control" placeholder="Buscar queijo..." style="flex: 1; max-width: 300px;">
+                        <select id="filterCategory" class="form-control" style="max-width: 200px;">
+                            <option value="">Todas categorias</option>
+                            <option value="nacional">Nacional</option>
+                            <option value="importado">Importado</option>
+                            <option value="artesanal">Artesanal</option>
+                            <option value="tradicional">Tradicional</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="resetFilters()">
+                            <i class="fas fa-redo"></i> Limpar Filtros
+                        </button>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="cheese-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Preço</th>
+                                    <th>Descrição</th>
+                                    <th>Categoria</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cheeseTableBody">
+                                <!-- Queijos serão carregados aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pedidos -->
+            <div id="orders" class="tab-content">
+                <div class="panel">
+                    <h2 class="panel-title">Pedidos dos Clientes</h2>
+                    
+                    <div style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                        <select id="filterStatus" class="form-control" style="max-width: 200px;">
+                            <option value="">Todos os status</option>
+                            <option value="pendente">Pendente</option>
+                            <option value="pago">Pago</option>
+                            <option value="entregue">Entregue</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                        <input type="date" id="filterDate" class="form-control" style="max-width: 200px;">
+                        <button class="btn btn-secondary" onclick="resetOrderFilters()">
+                            <i class="fas fa-redo"></i> Limpar Filtros
+                        </button>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="cheese-table order-table">
+                            <thead>
+                                <tr>
+                                    <th>Pedido #</th>
+                                    <th>Cliente</th>
+                                    <th>Itens</th>
+                                    <th>Total</th>
+                                    <th>Data</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                                <!-- Pedidos serão carregados aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Configurações -->
+            <div id="settings" class="tab-content">
+                <div class="panel">
+                    <h2 class="panel-title">Configurações do Sistema</h2>
+                    
+                    <div class="form-group">
+                        <label>Email para Notificações</label>
+                        <input type="email" id="notificationEmail" class="form-control" placeholder="seu@email.com">
+                        <small>Você receberá um email sempre que houver um novo pedido</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>WhatsApp para Notificações</label>
+                        <input type="text" id="whatsappNumber" class="form-control" placeholder="(11) 99999-9999">
+                        <small>Você receberá uma mensagem no WhatsApp para cada novo pedido</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Taxa de Entrega Padrão (R$)</label>
+                        <input type="number" id="deliveryFee" class="form-control" placeholder="10.00" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Prazo de Entrega (dias)</label>
+                        <input type="number" id="deliveryDays" class="form-control" placeholder="3">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Cidade Padrão</label>
+                        <input type="text" id="defaultCity" class="form-control" placeholder="Taubaté">
+                        <small>Cidade padrão para entregas</small>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-success" onclick="saveSettings()">
+                            <i class="fas fa-save"></i> Salvar Configurações
+                        </button>
+                        <button class="btn btn-secondary" onclick="loadSettings()">
+                            <i class="fas fa-sync"></i> Carregar Configurações
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Segurança -->
+            <div id="security" class="tab-content">
+                <div class="panel">
+                    <h2 class="panel-title">
+                        <i class="fas fa-user-shield"></i> Segurança e Senha
+                    </h2>
+                    
+                    <div class="form-group">
+                        <label>Email do Administrador</label>
+                        <input type="email" id="adminEmail" class="form-control" placeholder="seu@email.com">
+                        <small>Email usado para login no sistema</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Senha Atual</label>
+                        <div class="password-container">
+                            <input type="password" id="currentPassword" class="form-control" placeholder="Digite sua senha atual">
+                            <button type="button" class="toggle-password" onclick="togglePassword('currentPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nova Senha</label>
+                        <div class="password-container">
+                            <input type="password" id="newPassword" class="form-control" placeholder="Mínimo 6 caracteres">
+                            <button type="button" class="toggle-password" onclick="togglePassword('newPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div id="passwordStrength" class="password-strength"></div>
+                        <small>Use pelo menos 6 caracteres, incluindo letras e números</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Confirmar Nova Senha</label>
+                        <div class="password-container">
+                            <input type="password" id="confirmPassword" class="form-control" placeholder="Digite a nova senha novamente">
+                            <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Opção de recuperação por código -->
+                    <div class="form-group" id="recoveryCodeSection" style="display:none; background:#f8f9fa; padding:15px; border-radius:5px;">
+                        <label>Código de Recuperação</label>
+                        <input type="text" id="recoveryCode" class="form-control" placeholder="Código recebido por email">
+                        <small>Use o código recebido na opção "Esqueci minha senha" na tela de login</small>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 30px;">
+                        <button class="btn btn-success" onclick="changePassword()">
+                            <i class="fas fa-key"></i> Alterar Senha
+                        </button>
+                        
+                        <button class="btn btn-secondary" onclick="showRecoveryOption()">
+                            <i class="fas fa-unlock-alt"></i> Esqueci a Senha
+                        </button>
+                        
+                        <button class="btn btn-danger" onclick="logoutAllDevices()">
+                            <i class="fas fa-sign-out-alt"></i> Sair de Todos os Dispositivos
+                        </button>
+                    </div>
+                    
+                    <!-- Histórico de alterações -->
+                    <div class="password-history">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 15px;">
+                            <i class="fas fa-history"></i> Histórico de Alterações
+                        </h3>
+                        <div id="passwordHistory">
+                            <!-- Histórico será carregado aqui -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Notificações -->
+            <div id="notifications" class="tab-content">
+                <div class="panel">
+                    <h2 class="panel-title">Histórico de Notificações</h2>
+                    
+                    <div style="margin-bottom: 20px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="markAllAsRead()">
+                            <i class="fas fa-check-double"></i> Marcar Todas como Lidas
+                        </button>
+                        <button class="btn btn-danger" onclick="clearAllNotifications()">
+                            <i class="fas fa-trash"></i> Limpar Todas
+                        </button>
+                    </div>
+                    
+                    <div class="notifications-list" id="notificationsList">
+                        <!-- Notificações serão carregadas aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Adicionar/Editar Queijo -->
+    <div class="modal" id="cheeseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Adicionar Novo Queijo</h3>
+                <button class="close-modal" onclick="closeCheeseModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="cheeseForm">
+                    <input type="hidden" id="cheeseId" value="">
+                    
+                    <div class="form-group">
+                        <label>Nome do Queijo *</label>
+                        <input type="text" id="cheeseName" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Preço (R$) *</label>
+                        <input type="number" id="cheesePrice" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Descrição *</label>
+                        <textarea id="cheeseDescription" class="form-control" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Ícone/Emoji</label>
+                        <input type="text" id="cheeseIcon" class="form-control" placeholder="🧀" maxlength="2">
+                        <small>Use um emoji ou ícone para representar o queijo</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Categoria</label>
+                        <select id="cheeseCategory" class="form-control">
+                            <option value="nacional">Nacional</option>
+                            <option value="importado">Importado</option>
+                            <option value="artesanal">Artesanal</option>
+                            <option value="tradicional">Tradicional</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Salvar Queijo
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="closeCheeseModal()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Detalhes do Pedido -->
+    <div class="modal order-details-modal" id="orderDetailsModal">
+        <div class="order-details-content">
+            <div class="order-details-header">
+                <h3 id="orderDetailsTitle">Detalhes do Pedido</h3>
+                <button class="close-order-details" onclick="closeOrderDetails()">&times;</button>
+            </div>
+            <div class="order-details-body" id="orderDetailsBody">
+                <!-- Detalhes do pedido serão inseridos aqui -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Painel de Notificações em Tempo Real -->
+    <div class="notifications-panel" id="notificationsPanel">
+        <!-- Notificações aparecerão aqui -->
+    </div>
+    
+    <script>
+        // ===== SISTEMA DE SEGURANÇA =====
+        
+        // Verificar login e sessão
+        function checkAdminLogin() {
+            const isLoggedIn = localStorage.getItem('queijosDeliciaLoggedIn') === 'true' || 
+                              sessionStorage.getItem('queijosDeliciaLoggedIn') === 'true';
+            
+            if (!isLoggedIn) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            // Verificar tempo da sessão
+            const loginTime = localStorage.getItem('queijosDeliciaLoginTime') || 
+                             sessionStorage.getItem('queijosDeliciaLoginTime');
+            
+            if (loginTime) {
+                const now = new Date().getTime();
+                const thirtyMinutes = 30 * 60 * 1000;
+                
+                if (now - parseInt(loginTime) > thirtyMinutes) {
+                    alert('Sua sessão expirou por inatividade. Faça login novamente.');
+                    logoutAllDevices();
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        // Atualizar tempo da sessão em interações
+        function updateSessionTime() {
+            const currentTime = new Date().getTime().toString();
+            
+            if (localStorage.getItem('queijosDeliciaLoggedIn')) {
+                localStorage.setItem('queijosDeliciaLoginTime', currentTime);
+            }
+            
+            if (sessionStorage.getItem('queijosDeliciaLoggedIn')) {
+                sessionStorage.setItem('queijosDeliciaLoginTime', currentTime);
+            }
+            updateSessionExpiryDisplay();
+        }
+        
+        // Atualizar display de expiração da sessão
+        function updateSessionExpiryDisplay() {
+            const loginTime = localStorage.getItem('queijosDeliciaLoginTime') || 
+                             sessionStorage.getItem('queijosDeliciaLoginTime');
+            
+            if (loginTime) {
+                const now = new Date().getTime();
+                const expiryTime = parseInt(loginTime) + (30 * 60 * 1000);
+                const timeLeft = expiryTime - now;
+                
+                if (timeLeft > 0) {
+                    const minutes = Math.floor(timeLeft / 60000);
+                    const seconds = Math.floor((timeLeft % 60000) / 1000);
+                    document.getElementById('sessionExpiry').textContent = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                } else {
+                    document.getElementById('sessionExpiry').textContent = 'Expirada';
+                }
+            }
+        }
+        
+        // ===== DADOS INICIAIS - AGORA COM 8 QUEIJOS =====
+        
+        let cheeses = JSON.parse(localStorage.getItem('queijosDeliciaCheeses')) || [
+            {id: 1, name: "Queijo Minas Frescal", price: 24.90, description: "Tradicional queijo mineiro, leve e de sabor suave. Perfeito para o café da manhã.", icon: "🥛", category: "nacional"},
+            {id: 2, name: "Queijo Prato", price: 32.50, description: "Queijo amarelo de sabor suave e textura macia. Ideal para sanduíches e lanches.", icon: "🧀", category: "nacional"},
+            {id: 3, name: "Queijo Canastra", price: 56.90, description: "Queijo artesanal mineiro com sabor marcante e textura única. Feito com leite cru.", icon: "🏞️", category: "artesanal"},
+            {id: 4, name: "Queijo Gouda", price: 67.80, description: "Queijo holandês de sabor adocicado e textura cremosa. Maturado por 6 meses.", icon: "🇳🇱", category: "importado"},
+            {id: 5, name: "Queijo Brie", price: 72.40, description: "Queijo francês de casca branca e mofada, cremoso e de sabor delicado.", icon: "🇫🇷", category: "importado"},
+            {id: 6, name: "Queijo Parmesão", price: 88.90, description: "Queijo italiano duro e granular, sabor intenso. Perfeito para ralar sobre massas.", icon: "🍝", category: "importado"},
+            {id: 7, name: "Queijo Coalho", price: 28.70, description: "Típico do Nordeste brasileiro, perfeito para assar na brasa. Sabor suave e textura firme.", icon: "🔥", category: "nacional"},
+            {id: 8, name: "Queijo Provolone", price: 61.30, description: "Queijo italiano defumado, de sabor forte e textura firme. Ideal para petiscos.", icon: "🇮🇹", category: "importado"}
+        ];
+        
+        let orders = JSON.parse(localStorage.getItem('queijosDeliciaOrders')) || [];
+        
+        let notifications = JSON.parse(localStorage.getItem('queijosDeliciaNotifications')) || [];
+        
+        let settings = JSON.parse(localStorage.getItem('queijosDeliciaSettings')) || {
+            email: "",
+            whatsapp: "",
+            deliveryFee: 10.00,
+            deliveryDays: 3,
+            defaultCity: "Taubaté"
+        };
+        
+        // Histórico de alterações de senha
+        let passwordHistory = JSON.parse(localStorage.getItem('queijosDeliciaPasswordHistory')) || [];
+        
+        // ===== ELEMENTOS DO DOM =====
+        
+        const tabContents = document.querySelectorAll('.tab-content');
+        const navItems = document.querySelectorAll('.admin-nav li');
+        const currentDateElement = document.getElementById('currentDate');
+        const cheeseTableBody = document.getElementById('cheeseTableBody');
+        const ordersTableBody = document.getElementById('ordersTableBody');
+        const notificationsList = document.getElementById('notificationsList');
+        const cheeseModal = document.getElementById('cheeseModal');
+        const cheeseForm = document.getElementById('cheeseForm');
+        const notificationsPanel = document.getElementById('notificationsPanel');
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const pageTitle = document.getElementById('pageTitle');
+        
+        // ===== INICIALIZAÇÃO =====
+        
+        function initAdminPanel() {
+            if (!checkAdminLogin()) return;
+            
+            // Carregar usuário logado
+            const user = localStorage.getItem('queijosDeliciaUser') || 
+                        sessionStorage.getItem('queijosDeliciaUser') || 'admin';
+            document.getElementById('loggedUser').textContent = user;
+            
+            // Configurar data atual
+            updateCurrentDate();
+            
+            // Configurar navegação por abas
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const tabId = item.getAttribute('data-tab');
+                    if (!tabId) return; // Pula itens sem data-tab
+                    
+                    // Remover classe active de todos
+                    navItems.forEach(navItem => navItem.classList.remove('active'));
+                    tabContents.forEach(tab => tab.classList.remove('active'));
+                    
+                    // Adicionar classe active ao item clicado
+                    item.classList.add('active');
+                    const tabElement = document.getElementById(tabId);
+                    if (tabElement) {
+                        tabElement.classList.add('active');
+                        
+                        // Atualizar título da página
+                        const tabNames = {
+                            'dashboard': 'Dashboard',
+                            'cheeses': 'Gerenciar Queijos',
+                            'orders': 'Pedidos',
+                            'settings': 'Configurações',
+                            'security': 'Segurança',
+                            'notifications': 'Notificações'
+                        };
+                        pageTitle.textContent = tabNames[tabId] || 'Dashboard';
+                    }
+                    
+                    // Fechar menu mobile se estiver aberto
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.remove('expanded');
+                    }
+                    
+                    // Atualizar tempo da sessão
+                    updateSessionTime();
+                });
+            });
+            
+            // Menu mobile
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sidebar.classList.toggle('expanded');
+                updateSessionTime();
+            });
+            
+            // Fechar menu ao clicar fora
+            document.addEventListener('click', function(e) {
+                if (!sidebar.contains(e.target)) {
+                    sidebar.classList.remove('expanded');
+                }
+                updateSessionTime();
+            });
+            
+            // Logout
+            logoutBtn.addEventListener('click', function() {
+                if (confirm('Deseja realmente sair do painel admin?')) {
+                    localStorage.removeItem('queijosDeliciaLoggedIn');
+                    localStorage.removeItem('queijosDeliciaUser');
+                    localStorage.removeItem('queijosDeliciaLoginTime');
+                    sessionStorage.clear();
+                    window.location.href = 'login.html';
+                }
+            });
+            
+            // Carregar dados
+            loadCheeses();
+            loadOrders();
+            loadNotifications();
+            loadSettings();
+            loadPasswordHistory();
+            updateDashboard();
+            
+            // Configurar formulário de queijo
+            cheeseForm.addEventListener('submit', saveCheese);
+            
+            // Configurar verificação de força da senha
+            document.getElementById('newPassword').addEventListener('input', checkPasswordStrength);
+            
+            // Configurar busca de queijos
+            document.getElementById('searchCheese').addEventListener('input', filterCheeses);
+            document.getElementById('filterCategory').addEventListener('change', filterCheeses);
+            
+            // Configurar filtros de pedidos
+            document.getElementById('filterStatus').addEventListener('change', filterOrders);
+            document.getElementById('filterDate').addEventListener('change', filterOrders);
+            
+            // Verificar sessão periodicamente (a cada minuto)
+            setInterval(() => {
+                if (!checkAdminLogin()) {
+                    window.location.href = 'login.html';
+                }
+            }, 60000);
+            
+            // Atualizar tempo da sessão em interações
+            document.addEventListener('click', updateSessionTime);
+            document.addEventListener('keypress', updateSessionTime);
+            
+            // Atualizar expiração da sessão a cada segundo
+            setInterval(updateSessionExpiryDisplay, 1000);
+            
+            // Ajustar layout para mobile
+            adjustMobileLayout();
+            
+            // Verificar sincronização
+            checkDataSync();
+        }
+        
+        // ===== FUNÇÕES AUXILIARES =====
+        
+        function updateCurrentDate() {
+            const now = new Date();
+            currentDateElement.textContent = now.toLocaleDateString('pt-BR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+        
+        function adjustMobileLayout() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('expanded');
+            }
+        }
+        
+        // ===== DASHBOARD =====
+        
+        function updateDashboard() {
+            // Atualizar estatísticas
+            const totalSales = orders.reduce((sum, order) => sum + order.total, 0);
+            document.getElementById('totalSales').textContent = totalSales.toFixed(2);
+            
+            const today = new Date().toISOString().split('T')[0];
+            const todayOrdersCount = orders.filter(order => 
+                order.date && order.date.startsWith(today)
+            ).length;
+            document.getElementById('todayOrders').textContent = todayOrdersCount;
+            
+            document.getElementById('cheeseCount').textContent = cheeses.length;
+            document.getElementById('cheeseCountTitle').textContent = cheeses.length;
+            
+            const pendingOrdersCount = orders.filter(order => 
+                order.status === 'pendente'
+            ).length;
+            document.getElementById('pendingOrders').textContent = pendingOrdersCount;
+            
+            // Atualizar status de armazenamento
+            updateStorageStatus();
+            
+            // Atualizar último backup
+            const lastBackup = localStorage.getItem('queijosDeliciaLastBackup');
+            if (lastBackup) {
+                document.getElementById('lastBackup').textContent = 
+                    new Date(parseInt(lastBackup)).toLocaleString('pt-BR');
+            }
+        }
+        
+        function updateStorageStatus() {
+            let totalSize = 0;
+            
+            // Calcular tamanho dos dados
+            const dataKeys = [
+                'queijosDeliciaCheeses',
+                'queijosDeliciaOrders', 
+                'queijosDeliciaNotifications',
+                'queijosDeliciaSettings',
+                'queijosDeliciaAdminCredentials',
+                'queijosDeliciaPasswordHistory'
+            ];
+            
+            dataKeys.forEach(key => {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    totalSize += new Blob([data]).size;
+                }
+            });
+            
+            // Converter para KB/MB
+            let displaySize;
+            if (totalSize < 1024) {
+                displaySize = `${totalSize} B`;
+            } else if (totalSize < 1048576) {
+                displaySize = `${(totalSize / 1024).toFixed(2)} KB`;
+            } else {
+                displaySize = `${(totalSize / 1048576).toFixed(2)} MB`;
+            }
+            
+            document.getElementById('storageUsed').textContent = displaySize;
+        }
+        
+        function checkDataSync() {
+            // Verificar se os dados estão sincronizados
+            const storedCheeses = JSON.parse(localStorage.getItem('queijosDeliciaCheeses'));
+            const syncStatus = document.getElementById('syncStatus');
+            
+            if (storedCheeses && storedCheeses.length > 0) {
+                syncStatus.innerHTML = '<span style="color: #28a745;">✓ Sincronizado</span>';
+                syncStatus.title = `${storedCheeses.length} queijos carregados`;
+            } else {
+                syncStatus.innerHTML = '<span style="color: #dc3545;">⚠ Não sincronizado</span>';
+                syncStatus.title = 'Dados não encontrados no armazenamento local';
+            }
+        }
+        
+        // ===== GERENCIAR QUEIJOS =====
+        
+        function loadCheeses() {
+            // Carregar do localStorage
+            const storedCheeses = JSON.parse(localStorage.getItem('queijosDeliciaCheeses'));
+            if (storedCheeses && storedCheeses.length > 0) {
+                cheeses = storedCheeses;
+            } else {
+                // Salvar lista padrão se não houver dados
+                localStorage.setItem('queijosDeliciaCheeses', JSON.stringify(cheeses));
+            }
+            
+            displayCheeses();
+        }
+        
+        function displayCheeses(filteredCheeses = cheeses) {
+            cheeseTableBody.innerHTML = '';
+            
+            if (filteredCheeses.length === 0) {
+                cheeseTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #666;">
+                            <i class="fas fa-cheese" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                            Nenhum queijo encontrado.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            filteredCheeses.forEach(cheese => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${cheese.id}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.5rem;">${cheese.icon || '🧀'}</span>
+                            <strong>${cheese.name}</strong>
+                        </div>
+                    </td>
+                    <td>R$ ${cheese.price.toFixed(2)}</td>
+                    <td style="max-width: 300px;">${cheese.description}</td>
+                    <td>
+                        <span class="status-badge" style="background: #f0f0f0; color: #333;">
+                            ${cheese.category || 'nacional'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn edit-btn" onclick="editCheese(${cheese.id})">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteCheese(${cheese.id})">
+                                <i class="fas fa-trash"></i> Excluir
+                            </button>
+                        </div>
+                    </td>
+                `;
+                cheeseTableBody.appendChild(row);
+            });
+        }
+        
+        function filterCheeses() {
+            const searchTerm = document.getElementById('searchCheese').value.toLowerCase();
+            const categoryFilter = document.getElementById('filterCategory').value;
+            
+            let filtered = cheeses;
+            
+            if (searchTerm) {
+                filtered = filtered.filter(cheese => 
+                    cheese.name.toLowerCase().includes(searchTerm) ||
+                    cheese.description.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (categoryFilter) {
+                filtered = filtered.filter(cheese => 
+                    cheese.category === categoryFilter
+                );
+            }
+            
+            displayCheeses(filtered);
+            document.getElementById('cheeseCountTitle').textContent = filtered.length;
+        }
+        
+        function resetFilters() {
+            document.getElementById('searchCheese').value = '';
+            document.getElementById('filterCategory').value = '';
+            displayCheeses(cheeses);
+            document.getElementById('cheeseCountTitle').textContent = cheeses.length;
+        }
+        
+        function openCheeseModal(cheeseId = null) {
+            document.getElementById('modalTitle').textContent = 
+                cheeseId ? 'Editar Queijo' : 'Adicionar Novo Queijo';
+            
+            if (cheeseId) {
+                const cheese = cheeses.find(c => c.id === cheeseId);
+                if (cheese) {
+                    document.getElementById('cheeseId').value = cheese.id;
+                    document.getElementById('cheeseName').value = cheese.name;
+                    document.getElementById('cheesePrice').value = cheese.price;
+                    document.getElementById('cheeseDescription').value = cheese.description;
+                    document.getElementById('cheeseIcon').value = cheese.icon || '';
+                    document.getElementById('cheeseCategory').value = cheese.category || 'nacional';
+                }
+            } else {
+                document.getElementById('cheeseId').value = '';
+                document.getElementById('cheeseName').value = '';
+                document.getElementById('cheesePrice').value = '';
+                document.getElementById('cheeseDescription').value = '';
+                document.getElementById('cheeseIcon').value = '🧀';
+                document.getElementById('cheeseCategory').value = 'nacional';
+            }
+            
+            cheeseModal.style.display = 'flex';
+        }
+        
+        function closeCheeseModal() {
+            cheeseModal.style.display = 'none';
+            cheeseForm.reset();
+        }
+        
+        function saveCheese(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('cheeseId').value;
+            const name = document.getElementById('cheeseName').value.trim();
+            const price = parseFloat(document.getElementById('cheesePrice').value);
+            const description = document.getElementById('cheeseDescription').value.trim();
+            const icon = document.getElementById('cheeseIcon').value.trim();
+            const category = document.getElementById('cheeseCategory').value;
+            
+            if (!name || isNaN(price) || !description) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            if (id) {
+                // Editar queijo existente
+                const index = cheeses.findIndex(c => c.id === parseInt(id));
+                if (index !== -1) {
+                    cheeses[index] = {
+                        ...cheeses[index],
+                        name,
+                        price,
+                        description,
+                        icon: icon || '🧀',
+                        category
+                    };
+                }
+            } else {
+                // Adicionar novo queijo
+                const newId = cheeses.length > 0 ? Math.max(...cheeses.map(c => c.id)) + 1 : 1;
+                cheeses.push({
+                    id: newId,
+                    name,
+                    price,
+                    description,
+                    icon: icon || '🧀',
+                    category
+                });
+            }
+            
+            // Salvar no localStorage
+            localStorage.setItem('queijosDeliciaCheeses', JSON.stringify(cheeses));
+            
+            // Notificar o site sobre a atualização
+            notifySiteAboutUpdate();
+            
+            // Atualizar display
+            displayCheeses();
+            updateDashboard();
+            
+            // Fechar modal
+            closeCheeseModal();
+            
+            // Mostrar notificação
+            showNotification(
+                'success', 
+                id ? 'Queijo atualizado com sucesso!' : 'Queijo adicionado com sucesso!'
+            );
+        }
+        
+        function editCheese(id) {
+            openCheeseModal(id);
+        }
+        
+        function deleteCheese(id) {
+            if (!confirm('Tem certeza que deseja excluir este queijo?')) {
+                return;
+            }
+            
+            const cheeseName = cheeses.find(c => c.id === id)?.name || 'Queijo';
+            
+            // Remover do array
+            cheeses = cheeses.filter(c => c.id !== id);
+            
+            // Salvar no localStorage
+            localStorage.setItem('queijosDeliciaCheeses', JSON.stringify(cheeses));
+            
+            // Notificar o site sobre a atualização
+            notifySiteAboutUpdate();
+            
+            // Atualizar display
+            displayCheeses();
+            updateDashboard();
+            
+            // Mostrar notificação
+            showNotification(
+                'warning', 
+                `Queijo "${cheeseName}" excluído com sucesso!`
+            );
+        }
+        
+        // ===== PEDIDOS =====
+        
+        function loadOrders() {
+            orders = JSON.parse(localStorage.getItem('queijosDeliciaOrders')) || [];
+            displayOrders();
+        }
+        
+        function displayOrders(filteredOrders = orders) {
+            ordersTableBody.innerHTML = '';
+            
+            if (filteredOrders.length === 0) {
+                ordersTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+                            <i class="fas fa-shopping-cart" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                            Nenhum pedido encontrado.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Ordenar por data (mais recente primeiro)
+            const sortedOrders = [...filteredOrders].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+            
+            sortedOrders.forEach(order => {
+                const date = new Date(order.date);
+                const formattedDate = date.toLocaleDateString('pt-BR');
+                const formattedTime = date.toLocaleTimeString('pt-BR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                const itemsCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+                const itemsText = `${itemsCount} ${itemsCount === 1 ? 'item' : 'itens'}`;
+                
+                const statusClass = {
+                    'pendente': 'status-pending',
+                    'pago': 'status-paid',
+                    'entregue': 'status-delivered',
+                    'cancelado': 'status-pending'
+                }[order.status] || 'status-pending';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>#${order.id}</strong></td>
+                    <td>
+                        <strong>${order.customer.name}</strong><br>
+                        <small>${order.customer.phone}</small>
+                    </td>
+                    <td>${itemsText}</td>
+                    <td>R$ ${order.total.toFixed(2)}</td>
+                    <td>
+                        ${formattedDate}<br>
+                        <small>${formattedTime}</small>
+                    </td>
+                    <td>
+                        <span class="status-badge ${statusClass}">
+                            ${order.status.toUpperCase()}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn view-btn" onclick="viewOrderDetails('${order.id}')">
+                                <i class="fas fa-eye"></i> Ver
+                            </button>
+                            <button class="action-btn edit-btn" onclick="editOrderStatus('${order.id}')">
+                                <i class="fas fa-edit"></i> Status
+                            </button>
+                        </div>
+                    </td>
+                `;
+                ordersTableBody.appendChild(row);
+            });
+        }
+        
+        function filterOrders() {
+            const statusFilter = document.getElementById('filterStatus').value;
+            const dateFilter = document.getElementById('filterDate').value;
+            
+            let filtered = orders;
+            
+            if (statusFilter) {
+                filtered = filtered.filter(order => order.status === statusFilter);
+            }
+            
+            if (dateFilter) {
+                filtered = filtered.filter(order => {
+                    const orderDate = new Date(order.date).toISOString().split('T')[0];
+                    return orderDate === dateFilter;
+                });
+            }
+            
+            displayOrders(filtered);
+        }
+        
+        function resetOrderFilters() {
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterDate').value = '';
+            displayOrders(orders);
+        }
+        
+        // ===== DETALHES DO PEDIDO - MODAL =====
+        
+        function viewOrderDetails(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) {
+                alert('Pedido não encontrado!');
+                return;
+            }
+            
+            // Formatar data
+            const orderDate = new Date(order.date);
+            const formattedDate = orderDate.toLocaleDateString('pt-BR');
+            const formattedTime = orderDate.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            // Informações do cliente
+            const isDelivery = order.customer.type === 'delivery';
+            
+            // Método de pagamento
+            const paymentMethodNames = {
+                'pix': 'PIX (5% de desconto)',
+                'cash': 'Dinheiro na Entrega',
+                'card': 'Cartão na Entrega',
+                'transfer': 'Transferência Bancária'
+            };
+            
+            // Status do pedido
+            const statusClasses = {
+                'pendente': 'status-pendente',
+                'pago': 'status-pago',
+                'entregue': 'status-entregue',
+                'cancelado': 'status-cancelado'
+            };
+            
+            // Criar conteúdo do modal
+            const orderDetailsHTML = `
+                <!-- Informações do pedido -->
+                <div class="order-section">
+                    <h4 class="order-section-title">
+                        <i class="fas fa-info-circle"></i> Informações do Pedido
+                    </h4>
+                    <div class="order-info-grid">
+                        <div class="order-info-item">
+                            <div class="order-info-label">Número do Pedido</div>
+                            <div class="order-info-value">#${order.id}</div>
+                        </div>
+                        <div class="order-info-item">
+                            <div class="order-info-label">Data e Hora</div>
+                            <div class="order-info-value">${formattedDate} às ${formattedTime}</div>
+                        </div>
+                        <div class="order-info-item">
+                            <div class="order-info-label">Status</div>
+                            <div class="order-info-value ${statusClasses[order.status] || ''}">
+                                ${order.status.toUpperCase()}
+                            </div>
+                        </div>
+                        <div class="order-info-item">
+                            <div class="order-info-label">Total</div>
+                            <div class="order-info-value">R$ ${order.total.toFixed(2)}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Informações do cliente -->
+                <div class="order-section">
+                    <h4 class="order-section-title">
+                        <i class="fas fa-user"></i> Informações do Cliente
+                    </h4>
+                    <div class="order-info-grid">
+                        <div class="order-info-item">
+                            <div class="order-info-label">Nome</div>
+                            <div class="order-info-value">${order.customer.name}</div>
+                        </div>
+                        <div class="order-info-item">
+                            <div class="order-info-label">Telefone</div>
+                            <div class="order-info-value">${order.customer.phone}</div>
+                        </div>
+                        ${order.customer.whatsapp ? `
+                        <div class="order-info-item">
+                            <div class="order-info-label">WhatsApp</div>
+                            <div class="order-info-value">${order.customer.whatsapp}</div>
+                        </div>
+                        ` : ''}
+                        <div class="order-info-item">
+                            <div class="order-info-label">Tipo de Entrega</div>
+                            <div class="order-info-value">${isDelivery ? 'Entrega' : 'Retirada na Loja'}</div>
+                        </div>
+                        ${isDelivery ? `
+                        <div class="order-info-item">
+                            <div class="order-info-label">Endereço</div>
+                            <div class="order-info-value">${order.customer.address}, ${order.customer.neighborhood}</div>
+                        </div>
+                        <div class="order-info-item">
+                            <div class="order-info-label">Cidade/CEP</div>
+                            <div class="order-info-value">${order.customer.city} - ${order.customer.cep || 'N/A'}</div>
+                        </div>
+                        ${order.customer.complement ? `
+                        <div class="order-info-item">
+                            <div class="order-info-label">Complemento</div>
+                            <div class="order-info-value">${order.customer.complement}</div>
+                        </div>
+                        ` : ''}
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <!-- Itens do pedido -->
+                <div class="order-section">
+                    <h4 class="order-section-title">
+                        <i class="fas fa-shopping-cart"></i> Itens do Pedido
+                    </h4>
+                    <table class="order-items-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantidade</th>
+                                <th>Preço Unit.</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${order.items.map(item => `
+                                <tr>
+                                    <td>${item.name}</td>
+                                    <td>${item.quantity}</td>
+                                    <td>R$ ${item.price.toFixed(2)}</td>
+                                    <td>R$ ${(item.price * item.quantity).toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Resumo financeiro -->
+                <div class="order-section">
+                    <h4 class="order-section-title">
+                        <i class="fas fa-calculator"></i> Resumo Financeiro
+                    </h4>
+                    <div class="order-summary-box">
+                        <div class="summary-row">
+                            <span>Subtotal:</span>
+                            <span>R$ ${order.subtotal.toFixed(2)}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Taxa de Entrega:</span>
+                            <span>R$ ${order.deliveryFee.toFixed(2)}</span>
+                        </div>
+                        ${order.discount > 0 ? `
+                        <div class="summary-row">
+                            <span>Desconto PIX:</span>
+                            <span>- R$ ${order.discount.toFixed(2)}</span>
+                        </div>
+                        ` : ''}
+                        <div class="summary-row total">
+                            <span>TOTAL:</span>
+                            <span>R$ ${order.total.toFixed(2)}</span>
+                        </div>
+                        <div class="summary-row" style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                            <span>Método de Pagamento:</span>
+                            <span>${paymentMethodNames[order.paymentMethod] || order.paymentMethod}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Ações -->
+                <div class="order-actions">
+                    <button class="btn btn-success" onclick="editOrderStatusFromModal('${order.id}')">
+                        <i class="fas fa-edit"></i> Alterar Status
+                    </button>
+                    <button class="btn btn-secondary" onclick="printOrder('${order.id}')">
+                        <i class="fas fa-print"></i> Imprimir Pedido
+                    </button>
+                    <button class="btn" onclick="copyOrderToClipboard('${order.id}')">
+                        <i class="fas fa-copy"></i> Copiar Detalhes
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteOrder('${order.id}')">
+                        <i class="fas fa-trash"></i> Excluir Pedido
+                    </button>
+                </div>
+            `;
+            
+            // Atualizar modal
+            document.getElementById('orderDetailsTitle').textContent = `Pedido #${order.id}`;
+            document.getElementById('orderDetailsBody').innerHTML = orderDetailsHTML;
+            
+            // Mostrar modal
+            document.getElementById('orderDetailsModal').style.display = 'flex';
+            
+            // Atualizar sessão
+            updateSessionTime();
+        }
+        
+        function closeOrderDetails() {
+            document.getElementById('orderDetailsModal').style.display = 'none';
+        }
+        
+        // Fechar modal ao clicar fora
+        document.getElementById('orderDetailsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeOrderDetails();
+            }
+        });
+        
+        function editOrderStatusFromModal(orderId) {
+            closeOrderDetails();
+            editOrderStatus(orderId);
+        }
+        
+        function editOrderStatus(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            const newStatus = prompt(
+                `Alterar status do pedido #${orderId}\n\n` +
+                `Status atual: ${order.status.toUpperCase()}\n\n` +
+                `Novo status:\n` +
+                `1 - pendente\n` +
+                `2 - pago\n` +
+                `3 - entregue\n` +
+                `4 - cancelado`,
+                order.status
+            );
+            
+            if (newStatus && ['pendente', 'pago', 'entregue', 'cancelado'].includes(newStatus.toLowerCase())) {
+                order.status = newStatus.toLowerCase();
+                localStorage.setItem('queijosDeliciaOrders', JSON.stringify(orders));
+                displayOrders();
+                updateDashboard();
+                
+                // Adicionar notificação
+                addNotification(
+                    'Status do pedido alterado',
+                    `Pedido #${orderId} alterado para ${newStatus.toUpperCase()}`
+                );
+                
+                showNotification('success', `Status do pedido #${orderId} atualizado!`);
+            }
+        }
+        
+        function getPaymentMethodName(method) {
+            const methods = {
+                'pix': 'PIX',
+                'cash': 'Dinheiro',
+                'card': 'Cartão',
+                'transfer': 'Transferência'
+            };
+            return methods[method] || method;
+        }
+        
+        // Função para imprimir pedido
+        function printOrder(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            const printContent = `
+                <html>
+                <head>
+                    <title>Pedido #${order.id} - Queijos Delícia</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+                        h1 { color: #8B4513; text-align: center; }
+                        h2 { color: #333; border-bottom: 2px solid #8B4513; padding-bottom: 5px; }
+                        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+                        .info-item { background: #f5f5f5; padding: 10px; border-radius: 5px; }
+                        .info-label { font-size: 0.85rem; color: #666; }
+                        .info-value { font-weight: bold; }
+                        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+                        th { background-color: #f9f9f9; }
+                        .total { font-weight: bold; font-size: 1.2rem; color: #8B4513; }
+                        @media print {
+                            body { margin: 0; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>Pedido #${order.id}</h1>
+                    <p><strong>Data:</strong> ${new Date(order.date).toLocaleString('pt-BR')}</p>
+                    
+                    <h2>Informações do Cliente</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Nome</div>
+                            <div class="info-value">${order.customer.name}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Telefone</div>
+                            <div class="info-value">${order.customer.phone}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Tipo de Entrega</div>
+                            <div class="info-value">${order.customer.type === 'delivery' ? 'Entrega' : 'Retirada'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+                            <div class="info-value">${order.status.toUpperCase()}</div>
+                        </div>
+                    </div>
+                    
+                    ${order.customer.type === 'delivery' ? `
+                    <h2>Endereço de Entrega</h2>
+                    <p>${order.customer.address}, ${order.customer.neighborhood}</p>
+                    <p>${order.customer.city} - ${order.customer.cep || ''}</p>
+                    ${order.customer.complement ? `<p><strong>Complemento:</strong> ${order.customer.complement}</p>` : ''}
+                    ` : '<h2>Retirada na Loja</h2>'}
+                    
+                    <h2>Itens do Pedido</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Qtd</th>
+                                <th>Preço Unit.</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${order.items.map(item => `
+                                <tr>
+                                    <td>${item.name}</td>
+                                    <td>${item.quantity}</td>
+                                    <td>R$ ${item.price.toFixed(2)}</td>
+                                    <td>R$ ${(item.price * item.quantity).toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <h2>Resumo Financeiro</h2>
+                    <p><strong>Subtotal:</strong> R$ ${order.subtotal.toFixed(2)}</p>
+                    <p><strong>Taxa de Entrega:</strong> R$ ${order.deliveryFee.toFixed(2)}</p>
+                    ${order.discount > 0 ? `<p><strong>Desconto:</strong> -R$ ${order.discount.toFixed(2)}</p>` : ''}
+                    <p class="total"><strong>TOTAL:</strong> R$ ${order.total.toFixed(2)}</p>
+                    <p><strong>Método de Pagamento:</strong> ${getPaymentMethodName(order.paymentMethod)}</p>
+                    
+                    <div class="no-print" style="margin-top: 30px; text-align: center;">
+                        <button onclick="window.print()" style="padding: 10px 20px; background: #8B4513; color: white; border: none; cursor: pointer;">
+                            Imprimir
+                        </button>
+                        <button onclick="window.close()" style="padding: 10px 20px; background: #666; color: white; border: none; cursor: pointer; margin-left: 10px;">
+                            Fechar
+                        </button>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.focus();
+        }
+        
+        // Função para copiar detalhes do pedido
+        function copyOrderToClipboard(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            const text = `
+PEDIDO #${order.id}
+Data: ${new Date(order.date).toLocaleString('pt-BR')}
+Cliente: ${order.customer.name}
+Telefone: ${order.customer.phone}
+Status: ${order.status.toUpperCase()}
+${order.customer.type === 'delivery' ? `Endereço: ${order.customer.address}, ${order.customer.neighborhood}, ${order.customer.city}` : 'Retirada na loja'}
+
+ITENS:
+${order.items.map(item => `- ${item.quantity}x ${item.name} (R$ ${item.price.toFixed(2)} cada) = R$ ${(item.price * item.quantity).toFixed(2)}`).join('\n')}
+
+RESUMO:
+Subtotal: R$ ${order.subtotal.toFixed(2)}
+Taxa de entrega: R$ ${order.deliveryFee.toFixed(2)}
+${order.discount > 0 ? `Desconto: -R$ ${order.discount.toFixed(2)}\n` : ''}TOTAL: R$ ${order.total.toFixed(2)}
+Pagamento: ${getPaymentMethodName(order.paymentMethod)}
+            `.trim();
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('success', 'Detalhes do pedido copiados para a área de transferência!');
+            }).catch(err => {
+                console.error('Erro ao copiar:', err);
+                showNotification('error', 'Não foi possível copiar os detalhes.');
+            });
+        }
+        
+        // Função para excluir pedido
+        function deleteOrder(orderId) {
+            if (!confirm(`Tem certeza que deseja excluir o pedido #${orderId}? Esta ação não pode ser desfeita.`)) {
+                return;
+            }
+            
+            const orderIndex = orders.findIndex(o => o.id === orderId);
+            if (orderIndex === -1) return;
+            
+            // Remover pedido
+            orders.splice(orderIndex, 1);
+            
+            // Salvar no localStorage
+            localStorage.setItem('queijosDeliciaOrders', JSON.stringify(orders));
+            
+            // Atualizar display
+            displayOrders();
+            updateDashboard();
+            
+            // Fechar modal de detalhes
+            closeOrderDetails();
+            
+            // Mostrar notificação
+            showNotification('warning', `Pedido #${orderId} excluído com sucesso!`);
+            
+            // Adicionar ao histórico
+            addNotification('Pedido excluído', `Pedido #${orderId} foi removido do sistema`);
+        }
+        
+        // ===== CONFIGURAÇÕES =====
+        
+        function loadSettings() {
+            settings = JSON.parse(localStorage.getItem('queijosDeliciaSettings')) || {
+                email: "",
+                whatsapp: "",
+                deliveryFee: 10.00,
+                deliveryDays: 3,
+                defaultCity: "Taubaté"
+            };
+            
+            document.getElementById('notificationEmail').value = settings.email || '';
+            document.getElementById('whatsappNumber').value = settings.whatsapp || '';
+            document.getElementById('deliveryFee').value = settings.deliveryFee || 10.00;
+            document.getElementById('deliveryDays').value = settings.deliveryDays || 3;
+            document.getElementById('defaultCity').value = settings.defaultCity || 'Taubaté';
+        }
+        
+        function saveSettings() {
+            settings = {
+                email: document.getElementById('notificationEmail').value.trim(),
+                whatsapp: document.getElementById('whatsappNumber').value.trim(),
+                deliveryFee: parseFloat(document.getElementById('deliveryFee').value) || 10.00,
+                deliveryDays: parseInt(document.getElementById('deliveryDays').value) || 3,
+                defaultCity: document.getElementById('defaultCity').value.trim() || 'Taubaté'
+            };
+            
+            localStorage.setItem('queijosDeliciaSettings', JSON.stringify(settings));
+            showNotification('success', 'Configurações salvas com sucesso!');
+        }
+        
+        // ===== SEGURANÇA =====
+        
+        function loadPasswordHistory() {
+            passwordHistory = JSON.parse(localStorage.getItem('queijosDeliciaPasswordHistory')) || [];
+            
+            const historyContainer = document.getElementById('passwordHistory');
+            if (passwordHistory.length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="history-item">
+                        <p>Nenhuma alteração de senha registrada.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            historyContainer.innerHTML = '';
+            passwordHistory.slice(0, 10).forEach(entry => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                    <p><strong>${entry.action}</strong></p>
+                    <p class="history-date">${new Date(entry.timestamp).toLocaleString('pt-BR')}</p>
+                    ${entry.note ? `<p><small>${entry.note}</small></p>` : ''}
+                `;
+                historyContainer.appendChild(item);
+            });
+        }
+        
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const button = field.parentNode.querySelector('.toggle-password');
+            const icon = button.querySelector('i');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+                button.title = 'Ocultar senha';
+            } else {
+                field.type = 'password';
+                icon.className = 'fas fa-eye';
+                button.title = 'Mostrar senha';
+            }
+        }
+        
+        function checkPasswordStrength() {
+            const password = document.getElementById('newPassword').value;
+            const strengthElement = document.getElementById('passwordStrength');
+            
+            if (password.length === 0) {
+                strengthElement.style.display = 'none';
+                return;
+            }
+            
+            let strength = 0;
+            let message = '';
+            
+            // Verificar comprimento
+            if (password.length >= 6) strength++;
+            if (password.length >= 8) strength++;
+            
+            // Verificar caracteres diversos
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            // Determinar nível de força
+            if (strength < 3) {
+                strengthElement.className = 'password-strength weak';
+                message = 'Senha fraca';
+            } else if (strength < 5) {
+                strengthElement.className = 'password-strength medium';
+                message = 'Senha média';
+            } else {
+                strengthElement.className = 'password-strength strong';
+                message = 'Senha forte';
+            }
+            
+            strengthElement.textContent = message;
+            strengthElement.style.display = 'block';
+        }
+        
+        function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const recoveryCode = document.getElementById('recoveryCode').value;
+            const useRecovery = document.getElementById('recoveryCodeSection').style.display !== 'none';
+            
+            // Verificar credenciais atuais
+            const savedCredentials = JSON.parse(localStorage.getItem('queijosDeliciaAdminCredentials')) || {
+                email: 'admin@queijos.com',
+                password: 'admin123'
+            };
+            
+            let isValid = false;
+            
+            if (useRecovery && recoveryCode) {
+                // Verificar código de recuperação
+                const tempCode = localStorage.getItem('queijosDeliciaTempCode');
+                const tempCodeTime = localStorage.getItem('queijosDeliciaTempCodeTime');
+                
+                if (tempCode && tempCodeTime) {
+                    const now = new Date().getTime();
+                    const tenMinutes = 10 * 60 * 1000;
+                    
+                    if (recoveryCode === tempCode && (now - parseInt(tempCodeTime)) < tenMinutes) {
+                        isValid = true;
+                        // Limpar código temporário
+                        localStorage.removeItem('queijosDeliciaTempCode');
+                        localStorage.removeItem('queijosDeliciaTempCodeTime');
+                    } else {
+                        alert('Código de recuperação inválido ou expirado.');
+                        return;
+                    }
+                } else {
+                    alert('Nenhum código de recuperação válido encontrado.');
+                    return;
+                }
+            } else {
+                // Verificar senha atual
+                if (currentPassword === savedCredentials.password) {
+                    isValid = true;
+                } else {
+                    alert('Senha atual incorreta.');
+                    return;
+                }
+            }
+            
+            if (!isValid) {
+                alert('Não foi possível validar suas credenciais.');
+                return;
+            }
+            
+            // Verificar nova senha
+            if (newPassword.length < 6) {
+                alert('A nova senha deve ter pelo menos 6 caracteres.');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                alert('As senhas não coincidem.');
+                return;
+            }
+            
+            // Atualizar senha
+            savedCredentials.password = newPassword;
+            localStorage.setItem('queijosDeliciaAdminCredentials', JSON.stringify(savedCredentials));
+            
+            // Registrar no histórico
+            passwordHistory.unshift({
+                action: 'Senha alterada',
+                timestamp: new Date().toISOString(),
+                note: useRecovery ? 'Via código de recuperação' : 'Via senha atual'
+            });
+            
+            // Manter apenas os últimos 20 registros
+            if (passwordHistory.length > 20) {
+                passwordHistory = passwordHistory.slice(0, 20);
+            }
+            
+            localStorage.setItem('queijosDeliciaPasswordHistory', JSON.stringify(passwordHistory));
+            
+            // Limpar campos
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            document.getElementById('recoveryCode').value = '';
+            document.getElementById('passwordStrength').style.display = 'none';
+            document.getElementById('recoveryCodeSection').style.display = 'none';
+            
+            // Atualizar histórico
+            loadPasswordHistory();
+            
+            // Mostrar notificação
+            showNotification('success', 'Senha alterada com sucesso!');
+            
+            // Deslogar de todos os dispositivos (opcional)
+            if (confirm('Deseja sair de todos os dispositivos após alterar a senha?')) {
+                logoutAllDevices();
+            }
+        }
+        
+        function showRecoveryOption() {
+            document.getElementById('recoveryCodeSection').style.display = 'block';
+        }
+        
+        function logoutAllDevices() {
+            if (confirm('Isso irá desconectar você de todos os dispositivos. Continuar?')) {
+                localStorage.removeItem('queijosDeliciaLoggedIn');
+                localStorage.removeItem('queijosDeliciaUser');
+                localStorage.removeItem('queijosDeliciaLoginTime');
+                sessionStorage.clear();
+                
+                showNotification('info', 'Desconectado de todos os dispositivos.');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+            }
+        }
+        
+        // ===== NOTIFICAÇÕES =====
+        
+        function loadNotifications() {
+            notifications = JSON.parse(localStorage.getItem('queijosDeliciaNotifications')) || [];
+            displayNotifications();
+        }
+        
+        function displayNotifications() {
+            notificationsList.innerHTML = '';
+            
+            if (notifications.length === 0) {
+                notificationsList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-bell-slash" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                        Nenhuma notificação.
+                    </div>
+                `;
+                return;
+            }
+            
+            // Ordenar por data (mais recente primeiro)
+            const sortedNotifications = [...notifications].sort((a, b) => 
+                new Date(b.time) - new Date(a.time)
+            );
+            
+            sortedNotifications.forEach(notification => {
+                const item = document.createElement('div');
+                item.className = 'notification-item';
+                item.style.opacity = notification.read ? '0.7' : '1';
+                item.style.borderLeftColor = notification.read ? '#ccc' : '#8B4513';
+                
+                item.innerHTML = `
+                    <div class="notification-title">
+                        ${notification.title}
+                        ${!notification.read ? '<span style="color: #dc3545; font-size: 0.8rem;"> (NOVA)</span>' : ''}
+                    </div>
+                    <p>${notification.message}</p>
+                    <div class="notification-time">
+                        ${notification.time}
+                    </div>
+                `;
+                
+                // Marcar como lida ao clicar
+                if (!notification.read) {
+                    item.addEventListener('click', () => {
+                        notification.read = true;
+                        localStorage.setItem('queijosDeliciaNotifications', JSON.stringify(notifications));
+                        displayNotifications();
+                        updateDashboard();
+                    });
+                }
+                
+                notificationsList.appendChild(item);
+            });
+        }
+        
+        function addNotification(title, message) {
+            notifications.unshift({
+                id: notifications.length + 1,
+                title,
+                message,
+                time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                read: false
+            });
+            
+            localStorage.setItem('queijosDeliciaNotifications', JSON.stringify(notifications));
+            displayNotifications();
+            
+            // Mostrar notificação em tempo real
+            showLiveNotification(title, message);
+        }
+        
+        function markAllAsRead() {
+            notifications.forEach(notification => {
+                notification.read = true;
+            });
+            
+            localStorage.setItem('queijosDeliciaNotifications', JSON.stringify(notifications));
+            displayNotifications();
+            showNotification('success', 'Todas as notificações marcadas como lidas.');
+        }
+        
+        function clearAllNotifications() {
+            if (confirm('Deseja limpar todas as notificações?')) {
+                notifications = [];
+                localStorage.setItem('queijosDeliciaNotifications', JSON.stringify(notifications));
+                displayNotifications();
+                showNotification('info', 'Notificações limpas.');
+            }
+        }
+        
+        function showLiveNotification(title, message) {
+            const notification = document.createElement('div');
+            notification.className = 'live-notification';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                    <i class="fas fa-bell" style="color: #28a745; font-size: 1.2rem; margin-top: 2px;"></i>
+                    <div style="flex: 1;">
+                        <strong>${title}</strong>
+                        <p style="margin: 5px 0 0; font-size: 0.9rem;">${message}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="background: none; border: none; color: #777; cursor: pointer; padding: 0;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            notificationsPanel.appendChild(notification);
+            
+            // Remover automaticamente após 5 segundos
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+        
+        function showNotification(type, message) {
+            // Implementação simples - pode ser expandida
+            const notification = document.createElement('div');
+            notification.className = 'live-notification';
+            notification.style.borderLeftColor = type === 'success' ? '#28a745' : 
+                                               type === 'error' ? '#dc3545' : 
+                                               type === 'warning' ? '#ffc107' : 
+                                               type === 'info' ? '#17a2b8' : '#28a745';
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 
+                                       type === 'error' ? 'exclamation-circle' : 
+                                       type === 'warning' ? 'exclamation-triangle' : 
+                                       'info-circle'}" 
+                       style="color: ${type === 'success' ? '#28a745' : 
+                                       type === 'error' ? '#dc3545' : 
+                                       type === 'warning' ? '#ffc107' : 
+                                       '#17a2b8'}; font-size: 1.2rem; margin-top: 2px;"></i>
+                    <div style="flex: 1;">
+                        <p style="margin: 0; font-size: 0.9rem;">${message}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="background: none; border: none; color: #777; cursor: pointer; padding: 0;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            notificationsPanel.appendChild(notification);
+            
+            // Remover automaticamente após 5 segundos
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+        
+        // ===== EXPORTAÇÃO E BACKUP =====
+        
+        function exportData(format) {
+            if (orders.length === 0) {
+                alert('Não há pedidos para exportar.');
+                return;
+            }
+            
+            let content = '';
+            let filename = '';
+            
+            if (format === 'csv') {
+                // Cabeçalhos CSV
+                content = 'ID,Cliente,Telefone,Itens,Total,Data,Status\n';
+                
+                // Dados
+                orders.forEach(order => {
+                    const itemsCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+                    const date = new Date(order.date).toLocaleDateString('pt-BR');
+                    
+                    content += `"${order.id}","${order.customer.name}","${order.customer.phone}",`;
+                    content += `"${itemsCount} itens","R$ ${order.total.toFixed(2)}","${date}","${order.status}"\n`;
+                });
+                
+                filename = `pedidos_queijos_${new Date().toISOString().split('T')[0]}.csv`;
+                
+            } else if (format === 'excel') {
+                // Para Excel, criamos HTML que pode ser aberto no Excel
+                content = `
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <style>
+                            table { border-collapse: collapse; width: 100%; }
+                            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                            th { background-color: #8B4513; color: white; }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>Pedidos - Queijos Delícia</h2>
+                        <p>Exportado em: ${new Date().toLocaleString('pt-BR')}</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Cliente</th>
+                                    <th>Telefone</th>
+                                    <th>Itens</th>
+                                    <th>Total</th>
+                                    <th>Data</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${orders.map(order => {
+                                    const itemsCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+                                    const date = new Date(order.date).toLocaleDateString('pt-BR');
+                                    return `
+                                        <tr>
+                                            <td>${order.id}</td>
+                                            <td>${order.customer.name}</td>
+                                            <td>${order.customer.phone}</td>
+                                            <td>${itemsCount} itens</td>
+                                            <td>R$ ${order.total.toFixed(2)}</td>
+                                            <td>${date}</td>
+                                            <td>${order.status}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </body>
+                    </html>
+                `;
+                
+                filename = `pedidos_queijos_${new Date().toISOString().split('T')[0]}.xls`;
+            }
+            
+            // Criar e baixar arquivo
+            const blob = new Blob([content], { 
+                type: format === 'csv' ? 'text/csv;charset=utf-8;' : 'application/vnd.ms-excel;charset=utf-8;' 
+            });
+            
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('success', `Dados exportados em ${format.toUpperCase()}!`);
+        }
+        
+        function printOrders() {
+            if (orders.length === 0) {
+                alert('Não há pedidos para imprimir.');
+                return;
+            }
+            
+            const printContent = `
+                <html>
+                <head>
+                    <title>Pedidos - Queijos Delícia</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        h1 { color: #8B4513; text-align: center; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f5f5f5; }
+                        .total { font-weight: bold; margin-top: 20px; }
+                        @media print {
+                            body { margin: 0; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>Pedidos - Queijos Delícia</h1>
+                    <p><strong>Data do relatório:</strong> ${new Date().toLocaleString('pt-BR')}</p>
+                    <p><strong>Total de pedidos:</strong> ${orders.length}</p>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Itens</th>
+                                <th>Total</th>
+                                <th>Data</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${orders.map(order => {
+                                const itemsCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+                                const date = new Date(order.date).toLocaleDateString('pt-BR');
+                                return `
+                                    <tr>
+                                        <td>${order.id}</td>
+                                        <td>${order.customer.name}</td>
+                                        <td>${itemsCount} itens</td>
+                                        <td>R$ ${order.total.toFixed(2)}</td>
+                                        <td>${date}</td>
+                                        <td>${order.status}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <div class="total">
+                        <p><strong>Valor total dos pedidos:</strong> R$ ${orders.reduce((sum, order) => sum + order.total, 0).toFixed(2)}</p>
+                    </div>
+                    
+                    <div class="no-print" style="margin-top: 30px; text-align: center;">
+                        <button onclick="window.print()" style="padding: 10px 20px; background: #8B4513; color: white; border: none; cursor: pointer;">
+                            Imprimir
+                        </button>
+                        <button onclick="window.close()" style="padding: 10px 20px; background: #666; color: white; border: none; cursor: pointer; margin-left: 10px;">
+                            Fechar
+                        </button>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.focus();
+        }
+        
+        function backupData() {
+            // Coletar todos os dados
+            const backup = {
+                cheeses: JSON.parse(localStorage.getItem('queijosDeliciaCheeses')) || [],
+                orders: JSON.parse(localStorage.getItem('queijosDeliciaOrders')) || [],
+                notifications: JSON.parse(localStorage.getItem('queijosDeliciaNotifications')) || [],
+                settings: JSON.parse(localStorage.getItem('queijosDeliciaSettings')) || {},
+                credentials: JSON.parse(localStorage.getItem('queijosDeliciaAdminCredentials')) || {
+                    email: 'admin@queijos.com',
+                    password: 'admin123'
+                },
+                passwordHistory: JSON.parse(localStorage.getItem('queijosDeliciaPasswordHistory')) || [],
+                metadata: {
+                    backupDate: new Date().toISOString(),
+                    totalItems: {
+                        cheeses: cheeses.length,
+                        orders: orders.length,
+                        notifications: notifications.length
+                    }
+                }
+            };
+            
+            // Converter para JSON
+            const backupJson = JSON.stringify(backup, null, 2);
+            
+            // Criar arquivo para download
+            const blob = new Blob([backupJson], { type: 'application/json' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const dateStr = new Date().toISOString().split('T')[0];
+            link.setAttribute('href', url);
+            link.setAttribute('download', `backup_queijos_${dateStr}.json`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Registrar backup
+            localStorage.setItem('queijosDeliciaLastBackup', new Date().getTime().toString());
+            
+            // Adicionar notificação
+            addNotification(
+                'Backup realizado',
+                `Backup completo realizado em ${new Date().toLocaleString('pt-BR')}`
+            );
+            
+            showNotification('success', 'Backup realizado com sucesso!');
+            
+            // Atualizar dashboard
+            updateDashboard();
+        }
+        
+        // ===== FUNÇÕES DE SINCRONIZAÇÃO =====
+        
+        function forceSiteUpdate() {
+            // Esta função pode ser usada para notificar o site principal sobre mudanças
+            localStorage.setItem('queijosDeliciaLastUpdate', new Date().getTime().toString());
+            showNotification('info', 'Dados atualizados. As mudanças serão refletidas no site.');
+        }
+        
+        function notifySiteAboutUpdate() {
+            // Marcar que o painel admin fez uma atualização
+            localStorage.setItem('queijosDeliciaLastAdminUpdate', Date.now().toString());
+            
+            // Chamar a função existente
+            forceSiteUpdate();
+        }
+        
+        // ===== INICIAR APLICAÇÃO =====
+        
+        // Aguardar o carregamento do DOM
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAdminPanel);
+        } else {
+            initAdminPanel();
+        }
+        
+        // Configurar redimensionamento
+        window.addEventListener('resize', adjustMobileLayout);
+    </script>
+</body>
+</html>

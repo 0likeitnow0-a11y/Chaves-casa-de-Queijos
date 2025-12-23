@@ -1,0 +1,1988 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Queijos Delícia - Venda de Queijos Artesanais</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --primary-color: #8B4513;
+            --secondary-color: #D2691E;
+            --light-color: #FFF8DC;
+            --dark-color: #5D2906;
+            --text-color: #333;
+            --white: #ffffff;
+        }
+        
+        html, body {
+            width: 100%;
+            overflow-x: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f5f0;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header e Navegação */
+        header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        
+        .header-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        
+        .logo i {
+            font-size: clamp(1.8rem, 5vw, 2rem);
+        }
+        
+        .logo h1 {
+            font-size: clamp(1.4rem, 4vw, 1.8rem);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        
+        .logo span {
+            color: var(--light-color);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: clamp(10px, 3vw, 25px);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        nav a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            transition: color 0.3s;
+            white-space: nowrap;
+        }
+        
+        nav a:hover {
+            color: var(--light-color);
+        }
+        
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--secondary-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(139, 69, 19, 0.8), rgba(139, 69, 19, 0.9));
+            background-size: cover;
+            background-position: center;
+            color: var(--white);
+            padding: clamp(40px, 10vw, 80px) 20px;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .hero h2 {
+            font-size: clamp(2rem, 6vw, 3rem);
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            max-width: 700px;
+            margin: 0 auto 30px;
+            line-height: 1.5;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: var(--white);
+            padding: clamp(10px, 3vw, 12px) clamp(20px, 4vw, 30px);
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: clamp(1rem, 3vw, 1.1rem);
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .btn:hover {
+            background-color: var(--dark-color);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Seção de Queijos */
+        .section-title {
+            text-align: center;
+            margin: clamp(40px, 8vw, 60px) 0 clamp(30px, 6vw, 40px);
+            color: var(--primary-color);
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+        }
+        
+        .cheeses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: clamp(20px, 4vw, 30px);
+            margin-bottom: clamp(40px, 8vw, 60px);
+            width: 100%;
+        }
+        
+        @media (max-width: 380px) {
+            .cheeses-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .cheese-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 100%;
+        }
+        
+        .cheese-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .cheese-img {
+            height: clamp(150px, 40vw, 200px);
+            width: 100%;
+            background-color: var(--light-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(3rem, 10vw, 4rem);
+            color: var(--primary-color);
+        }
+        
+        .cheese-info {
+            padding: clamp(15px, 3vw, 20px);
+        }
+        
+        .cheese-info h3 {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            line-height: 1.3;
+        }
+        
+        .cheese-info p {
+            color: #666;
+            margin-bottom: 15px;
+            height: auto;
+            min-height: 60px;
+            font-size: clamp(0.9rem, 3vw, 1rem);
+            line-height: 1.4;
+        }
+        
+        .cheese-price {
+            font-size: clamp(1.5rem, 4vw, 1.8rem);
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        
+        .cheese-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quantity-btn {
+            background-color: var(--light-color);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        
+        .quantity-input {
+            width: 50px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+            font-size: 1rem;
+        }
+        
+        /* Seção Sobre */
+        .about {
+            background-color: var(--light-color);
+            padding: clamp(40px, 8vw, 60px) 0;
+            margin: 40px 0;
+            width: 100%;
+        }
+        
+        .about-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(30px, 6vw, 50px);
+        }
+        
+        @media (min-width: 768px) {
+            .about-content {
+                flex-direction: row;
+            }
+        }
+        
+        .about-text {
+            flex: 1;
+            width: 100%;
+        }
+        
+        .about-text h2 {
+            color: var(--primary-color);
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            margin-bottom: 20px;
+        }
+        
+        .about-image {
+            flex: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        
+        .about-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Carrinho de Compras */
+        .cart-modal {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background-color: var(--white);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        @media (min-width: 768px) {
+            .cart-modal {
+                width: 380px;
+                right: -400px;
+            }
+        }
+        
+        .cart-modal.active {
+            right: 0;
+        }
+        
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            flex-shrink: 0;
+        }
+        
+        .close-cart {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .cart-items {
+            padding: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .cart-item-details h4 {
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+        
+        .cart-item-price {
+            color: var(--secondary-color);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        
+        .cart-total {
+            padding: 20px;
+            border-top: 2px solid var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            font-size: clamp(1.1rem, 3vw, 1.3rem);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        .cart-actions {
+            padding: 0 20px 20px;
+            flex-shrink: 0;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark-color);
+            color: var(--white);
+            padding: clamp(30px, 6vw, 50px) 0 20px;
+            width: 100%;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: clamp(20px, 4vw, 40px);
+            margin-bottom: 40px;
+        }
+        
+        .footer-column h3 {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            margin-bottom: 20px;
+            color: var(--light-color);
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 10px;
+            font-size: clamp(0.9rem, 3vw, 1rem);
+        }
+        
+        .footer-column a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-column a:hover {
+            color: var(--secondary-color);
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .social-icons a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+        
+        .social-icons a:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: clamp(0.8rem, 3vw, 0.9rem);
+        }
+        
+        /* Botão Admin */
+        .admin-access {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 99;
+        }
+        
+        .admin-btn {
+            background-color: var(--dark-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .admin-btn:hover {
+            transform: scale(1.1);
+            background-color: var(--primary-color);
+        }
+        
+        /* Modal de Checkout */
+        .checkout-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .checkout-content {
+            background-color: white;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .checkout-header {
+            background-color: #8B4513;
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .checkout-body {
+            padding: 20px;
+        }
+        
+        .checkout-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .checkout-section:last-child {
+            border-bottom: none;
+        }
+        
+        .section-title-checkout {
+            font-size: 1.2rem;
+            color: #8B4513;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Formulário de entrega */
+        .delivery-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .delivery-option {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .delivery-option.selected {
+            border-color: #8B4513;
+            background-color: #FFF8DC;
+        }
+        
+        .delivery-option i {
+            font-size: 1.5rem;
+            color: #8B4513;
+            margin-bottom: 10px;
+        }
+        
+        /* Campos do formulário */
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            flex: 1;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        /* Resumo do pedido */
+        .order-summary {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #8B4513;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #ddd;
+        }
+        
+        .delivery-info {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        /* Status de pagamento */
+        .payment-status {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .payment-success {
+            color: #4CAF50;
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .payment-error {
+            color: #f44336;
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        /* Notificação de atualização */
+        .update-notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Responsividade do checkout */
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .delivery-options {
+                flex-direction: column;
+            }
+        }
+        
+        /* Ajustes para telas muito pequenas */
+        @media (max-width: 360px) {
+            .header-container {
+                justify-content: center;
+                text-align: center;
+            }
+            
+            .logo {
+                justify-content: center;
+            }
+            
+            .cheese-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .quantity-selector {
+                justify-content: center;
+                margin-bottom: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        /* Evitar zoom em inputs no iOS */
+        @media screen and (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+        
+        /* Ajuste para Safari iOS */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                min-height: -webkit-fill-available;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <div class="logo">
+                <i class="fas fa-cheese"></i>
+                <h1>Queijos <span>Delícia</span></h1>
+            </div>
+            
+            <nav>
+                <ul>
+                    <li><a href="#home">Início</a></li>
+                    <li><a href="#cheeses">Queijos</a></li>
+                    <li><a href="#about">Sobre</a></li>
+                    <li><a href="#contact">Contato</a></li>
+                </ul>
+            </nav>
+            
+            <div class="cart-icon" id="cartIcon">
+                <i class="fas fa-shopping-cart fa-lg"></i>
+                <span class="cart-count" id="cartCount">0</span>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <h2>Os Melhores Queijos Artesanais</h2>
+            <p>Descubra uma seleção premium de queijos finos, produzidos com tradição e qualidade para os verdadeiros amantes de queijo.</p>
+            <a href="#cheeses" class="btn">Comprar Agora</a>
+        </div>
+    </section>
+    
+    <!-- Seção de Queijos -->
+    <section id="cheeses">
+        <div class="container">
+            <h2 class="section-title">Nossos Queijos</h2>
+            
+            <div class="cheeses-grid" id="cheesesGrid">
+                <!-- Queijos serão inseridos aqui via JavaScript -->
+            </div>
+        </div>
+    </section>
+    
+    <!-- Seção Sobre -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>Nossa História</h2>
+                    <p>Há mais de 20 anos, a Queijos Delícia começou como uma pequena fazenda familiar no interior de Minas Gerais. Com a paixão por queijos artesanais e a tradição passada de geração em geração, nos dedicamos a produzir os melhores queijos com ingredientes selecionados e processos cuidadosamente controlados.</p>
+                    <p>Hoje, mantemos a mesma qualidade e cuidado artesanal, mas com capacidade para atender todo o Brasil. Nossos queijos são maturados no tempo certo, garantindo sabor e textura únicos que você só encontra aqui.</p>
+                    <p>Experimente a diferença de um queijo feito com paixão e tradição!</p>
+                </div>
+                <div class="about-image">
+                    <!-- Imagem ilustrativa -->
+                    <div style="width:100%; height:400px; background-color:#8B4513; display:flex; align-items:center; justify-content:center; color:white; font-size:5rem;">
+                        <i class="fas fa-cheese"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Carrinho de Compras -->
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-header">
+            <h3>Seu Carrinho</h3>
+            <button class="close-cart" id="closeCart">&times;</button>
+        </div>
+        
+        <div class="cart-items" id="cartItems">
+            <!-- Itens do carrinho serão inseridos aqui -->
+            <p id="emptyCartMessage" style="text-align:center; padding:20px;">Seu carrinho está vazio</p>
+        </div>
+        
+        <div class="cart-total">
+            <span>Total:</span>
+            <span id="cartTotal">R$ 0,00</span>
+        </div>
+        
+        <div class="cart-actions">
+            <button class="btn" style="width:100%;" id="checkoutBtn">Finalizar Compra</button>
+        </div>
+    </div>
+    
+    <!-- Modal de Checkout -->
+    <div class="checkout-modal" id="checkoutModal">
+        <div class="checkout-content">
+            <div class="checkout-header">
+                <h3>Finalizar Compra</h3>
+                <button class="close-checkout" id="closeCheckout">&times;</button>
+            </div>
+            
+            <div class="checkout-body" id="checkoutBody">
+                <!-- Formulário de entrega -->
+                <div class="checkout-section">
+                    <h4 class="section-title-checkout">
+                        <i class="fas fa-truck"></i> Informações de Entrega
+                    </h4>
+                    
+                    <div class="delivery-options">
+                        <div class="delivery-option selected" data-type="delivery">
+                            <i class="fas fa-home"></i>
+                            <div>Entrega</div>
+                            <small>Receba em casa</small>
+                        </div>
+                        <div class="delivery-option" data-type="pickup">
+                            <i class="fas fa-store"></i>
+                            <div>Retirar</div>
+                            <small>Na loja</small>
+                        </div>
+                    </div>
+                    
+                    <div id="deliveryForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nome Completo *</label>
+                                <input type="text" id="customerName" class="form-control" placeholder="Seu nome completo" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Telefone *</label>
+                                <input type="tel" id="customerPhone" class="form-control" placeholder="(12) 99999-9999" required>
+                            </div>
+                            <div class="form-group">
+                                <label>WhatsApp</label>
+                                <input type="tel" id="customerWhatsapp" class="form-control" placeholder="(12) 99999-9999">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>CEP *</label>
+                                <input type="text" id="customerCEP" class="form-control" placeholder="00000-000" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Endereço *</label>
+                                <input type="text" id="customerAddress" class="form-control" placeholder="Rua, número" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Bairro *</label>
+                                <input type="text" id="customerNeighborhood" class="form-control" placeholder="Bairro" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Cidade *</label>
+                                <input type="text" id="customerCity" class="form-control" placeholder="Cidade" value="Taubaté" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Complemento</label>
+                                <input type="text" id="customerComplement" class="form-control" placeholder="Apto, bloco, etc.">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Ponto de Referência</label>
+                                <input type="text" id="customerReference" class="form-control" placeholder="Perto de...">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="pickupForm" style="display: none;">
+                        <div class="delivery-info">
+                            <h4><i class="fas fa-store"></i> Retirada na Loja</h4>
+                            <p><strong>Endereço:</strong> Rua dos Queijos, 123 - Centro, Taubaté/SP</p>
+                            <p><strong>Horário:</strong> Segunda a Sábado, 8h às 18h</p>
+                            <p><strong>Telefone:</strong> (12) 3633-1234</p>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nome para Retirada *</label>
+                                <input type="text" id="pickupName" class="form-control" placeholder="Seu nome" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Telefone *</label>
+                                <input type="tel" id="pickupPhone" class="form-control" placeholder="(12) 99999-9999" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Informações de pagamento -->
+                <div class="checkout-section">
+                    <h4 class="section-title-checkout">
+                        <i class="fas fa-credit-card"></i> Forma de Pagamento
+                    </h4>
+                    
+                    <div class="form-group">
+                        <select id="paymentMethod" class="form-control">
+                            <option value="pix">PIX (5% de desconto)</option>
+                            <option value="cash">Dinheiro na Entrega</option>
+                            <option value="card">Cartão na Entrega</option>
+                            <option value="transfer">Transferência Bancária</option>
+                        </select>
+                    </div>
+                    
+                    <div id="pixInfo" style="display: none; background: #f0f8ff; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <h5><i class="fas fa-qrcode"></i> Pagamento PIX</h5>
+                        <p>Chave PIX: <strong>contato@queijosdelicia.com</strong></p>
+                        <p>Desconto de 5% no pagamento via PIX!</p>
+                    </div>
+                    
+                    <div id="transferInfo" style="display: none; background: #f0f8ff; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <h5><i class="fas fa-university"></i> Dados para Transferência</h5>
+                        <p>Banco: Itaú (341)</p>
+                        <p>Agência: 1234</p>
+                        <p>Conta: 56789-0</p>
+                        <p>Favorecido: Queijos Delícia LTDA</p>
+                        <p>CNPJ: 12.345.678/0001-90</p>
+                    </div>
+                </div>
+                
+                <!-- Resumo do pedido -->
+                <div class="checkout-section">
+                    <h4 class="section-title-checkout">
+                        <i class="fas fa-receipt"></i> Resumo do Pedido
+                    </h4>
+                    
+                    <div class="order-summary">
+                        <div id="checkoutItems">
+                            <!-- Itens serão inseridos aqui -->
+                        </div>
+                        
+                        <div class="summary-item">
+                            <span>Subtotal</span>
+                            <span id="checkoutSubtotal">R$ 0,00</span>
+                        </div>
+                        
+                        <div class="summary-item">
+                            <span>Taxa de Entrega</span>
+                            <span id="deliveryFee">R$ 0,00</span>
+                        </div>
+                        
+                        <div class="summary-item" id="discountItem" style="display: none;">
+                            <span>Desconto PIX (5%)</span>
+                            <span id="pixDiscount">- R$ 0,00</span>
+                        </div>
+                        
+                        <div class="summary-total">
+                            <span>Total</span>
+                            <span id="checkoutTotal">R$ 0,00</span>
+                        </div>
+                        
+                        <div class="delivery-info" id="deliveryWarning">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Taxa de entrega:</strong> R$ 3,00 para Taubaté. 
+                            Para outras cidades ou empresas, favor entrar em contato para negociação.
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Botão finalizar -->
+                <div class="checkout-section" style="text-align: center;">
+                    <button class="btn" style="width: 100%; padding: 15px; font-size: 1.1rem;" id="confirmOrderBtn">
+                        <i class="fas fa-check-circle"></i> Confirmar Pedido
+                    </button>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Ao confirmar, você concorda com nossos 
+                        <a href="#" style="color: #8B4513;">Termos de Venda</a>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Status do pagamento -->
+            <div class="payment-status" id="paymentStatus">
+                <div class="payment-success" id="successIcon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3 id="statusTitle">Pedido Confirmado!</h3>
+                <p id="statusMessage">Seu pedido foi recebido com sucesso.</p>
+                <div id="orderDetails" style="text-align: left; margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px;"></div>
+                <button class="btn" style="margin-top: 20px;" id="closeOrderBtn">
+                    <i class="fas fa-home"></i> Voltar à Loja
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>Queijos Delícia</h3>
+                    <p>Os melhores queijos artesanais entregues na sua casa. Qualidade e tradição em cada pedaço.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Links Rápidos</h3>
+                    <ul>
+                        <li><a href="#home">Início</a></li>
+                        <li><a href="#cheeses">Queijos</a></li>
+                        <li><a href="#about">Sobre Nós</a></li>
+                        <li><a href="#contact">Contato</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contato</h3>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt"></i> Rua dos Queijos, 123 - Centro, Taubaté/SP</li>
+                        <li><i class="fas fa-phone"></i> (12) 3633-1234</li>
+                        <li><i class="fas fa-envelope"></i> contato@queijosdelicia.com</li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Formas de Pagamento</h3>
+                    <p>Aceitamos todas as principais formas de pagamento:</p>
+                    <div style="margin-top:15px; font-size:1.8rem;">
+                        <i class="fab fa-cc-visa" style="margin-right:10px;"></i>
+                        <i class="fab fa-cc-mastercard" style="margin-right:10px;"></i>
+                        <i class="fab fa-cc-pix" style="font-size:1.5rem; background:#32BCAD; color:white; padding:5px; border-radius:5px;"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 Queijos Delícia. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Botão para acessar admin -->
+    <div class="admin-access">
+        <div class="admin-btn" title="Área do Administrador" onclick="accessAdminArea()">
+            <i class="fas fa-user-cog"></i>
+        </div>
+    </div>
+    
+    <script>
+        // Sistema de detecção mobile
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        // Ajustar layout para mobile
+        function adjustForMobile() {
+            if (isMobileDevice()) {
+                // Ajustar viewport
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+                
+                // Ajustar altura do hero
+                const hero = document.querySelector('.hero');
+                if (hero) {
+                    hero.style.minHeight = 'calc(var(--vh, 1vh) * 80)';
+                }
+                
+                // Prevenir zoom em inputs
+                document.addEventListener('focusin', function(e) {
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                        setTimeout(() => {
+                            document.activeElement.scrollIntoView({behavior: 'smooth', block: 'center'});
+                        }, 100);
+                    }
+                });
+            }
+        }
+        
+        // ===== DADOS DOS QUEIJOS - SISTEMA DE SINCRONIZAÇÃO =====
+        
+        // Dados dos queijos - COM VERIFICAÇÃO DE SINCRONIZAÇÃO
+        function loadCheesesData() {
+            const storedCheeses = JSON.parse(localStorage.getItem('queijosDeliciaCheeses'));
+            
+            if (storedCheeses && storedCheeses.length > 0) {
+                // Garantir que todos os queijos tenham os campos necessários
+                return storedCheeses.map(cheese => ({
+                    id: cheese.id || 0,
+                    name: cheese.name || 'Queijo',
+                    description: cheese.description || 'Descrição não disponível',
+                    price: cheese.price || 0,
+                    icon: cheese.icon || '🧀',
+                    category: cheese.category || 'nacional'
+                }));
+            } else {
+                // Dados padrão com IDs consistentes
+                const defaultCheeses = [
+                    {
+                        id: 1,
+                        name: "Queijo Minas Frescal",
+                        description: "Tradicional queijo mineiro, leve e de sabor suave. Perfeito para o café da manhã.",
+                        price: 24.90,
+                        icon: "🥛",
+                        category: "nacional"
+                    },
+                    {
+                        id: 2,
+                        name: "Queijo Prato",
+                        description: "Queijo amarelo de sabor suave e textura macia. Ideal para sanduíches e lanches.",
+                        price: 32.50,
+                        icon: "🧀",
+                        category: "nacional"
+                    },
+                    {
+                        id: 3,
+                        name: "Queijo Canastra",
+                        description: "Queijo artesanal mineiro com sabor marcante e textura única. Feito com leite cru.",
+                        price: 56.90,
+                        icon: "🏞️",
+                        category: "artesanal"
+                    },
+                    {
+                        id: 4,
+                        name: "Queijo Gouda",
+                        description: "Queijo holandês de sabor adocicado e textura cremosa. Maturado por 6 meses.",
+                        price: 67.80,
+                        icon: "🇳🇱",
+                        category: "importado"
+                    },
+                    {
+                        id: 5,
+                        name: "Queijo Brie",
+                        description: "Queijo francês de casca branca e mofada, cremoso e de sabor delicado.",
+                        price: 72.40,
+                        icon: "🇫🇷",
+                        category: "importado"
+                    },
+                    {
+                        id: 6,
+                        name: "Queijo Parmesão",
+                        description: "Queijo italiano duro e granular, sabor intenso. Perfeito para ralar sobre massas.",
+                        price: 88.90,
+                        icon: "🍝",
+                        category: "importado"
+                    },
+                    {
+                        id: 7,
+                        name: "Queijo Coalho",
+                        description: "Típico do Nordeste brasileiro, perfeito para assar na brasa. Sabor suave e textura firme.",
+                        price: 28.70,
+                        icon: "🔥",
+                        category: "nacional"
+                    },
+                    {
+                        id: 8,
+                        name: "Queijo Provolone",
+                        description: "Queijo italiano defumado, de sabor forte e textura firme. Ideal para petiscos.",
+                        price: 61.30,
+                        icon: "🇮🇹",
+                        category: "importado"
+                    }
+                ];
+                
+                // Salvar dados padrão no localStorage (para primeira execução)
+                localStorage.setItem('queijosDeliciaCheeses', JSON.stringify(defaultCheeses));
+                console.log('Dados padrão salvos no localStorage');
+                
+                return defaultCheeses;
+            }
+        }
+
+        // Inicializar dados dos queijos
+        let cheeses = loadCheesesData();
+        
+        // Carrinho de compras
+        let cart = [];
+        let cartCount = 0;
+        let cartTotal = 0;
+
+        // Elementos do DOM
+        const cartIcon = document.getElementById('cartIcon');
+        const cartModal = document.getElementById('cartModal');
+        const closeCart = document.getElementById('closeCart');
+        const cartCountElement = document.getElementById('cartCount');
+        const cartItemsElement = document.getElementById('cartItems');
+        const cartTotalElement = document.getElementById('cartTotal');
+        const emptyCartMessage = document.getElementById('emptyCartMessage');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const cheesesGrid = document.getElementById('cheesesGrid');
+
+        // Inicializar a exibição dos queijos
+        function displayCheeses() {
+            cheesesGrid.innerHTML = '';
+            
+            // Recarregar queijos atualizados
+            cheeses = loadCheesesData();
+            
+            if (cheeses.length === 0) {
+                cheesesGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <p style="font-size: 1.2rem; color: #666;">Nenhum queijo disponível no momento.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            cheeses.forEach(cheese => {
+                const cheeseCard = document.createElement('div');
+                cheeseCard.className = 'cheese-card';
+                cheeseCard.innerHTML = `
+                    <div class="cheese-img">
+                        <span style="font-size: 4rem;">${cheese.icon || '🧀'}</span>
+                    </div>
+                    <div class="cheese-info">
+                        <h3>${cheese.name}</h3>
+                        <p>${cheese.description}</p>
+                        <div class="cheese-price">R$ ${cheese.price.toFixed(2)}</div>
+                        <div class="cheese-actions">
+                            <div class="quantity-selector">
+                                <button class="quantity-btn minus" data-id="${cheese.id}">-</button>
+                                <input type="number" class="quantity-input" id="qty-${cheese.id}" value="1" min="1" max="10">
+                                <button class="quantity-btn plus" data-id="${cheese.id}">+</button>
+                            </div>
+                            <button class="btn add-to-cart" data-id="${cheese.id}">Adicionar</button>
+                        </div>
+                    </div>
+                `;
+                
+                cheesesGrid.appendChild(cheeseCard);
+            });
+            
+            // Adicionar eventos aos botões
+            setTimeout(() => {
+                document.querySelectorAll('.add-to-cart').forEach(button => {
+                    button.addEventListener('click', addToCart);
+                });
+                
+                document.querySelectorAll('.quantity-btn.minus').forEach(button => {
+                    button.addEventListener('click', decreaseQuantity);
+                });
+                
+                document.querySelectorAll('.quantity-btn.plus').forEach(button => {
+                    button.addEventListener('click', increaseQuantity);
+                });
+            }, 100);
+        }
+
+        // Adicionar ao carrinho
+        function addToCart(event) {
+            const cheeseId = parseInt(event.target.getAttribute('data-id'));
+            const quantityInput = document.getElementById(`qty-${cheeseId}`);
+            const quantity = parseInt(quantityInput.value) || 1;
+            
+            // Carregar queijos atualizados
+            cheeses = loadCheesesData();
+            const cheese = cheeses.find(c => c.id === cheeseId);
+            
+            if (!cheese) {
+                alert('Queijo não encontrado!');
+                return;
+            }
+            
+            // Verificar se o queijo já está no carrinho
+            const existingItem = cart.find(item => item.id === cheeseId);
+            
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                cart.push({
+                    id: cheese.id,
+                    name: cheese.name,
+                    price: cheese.price,
+                    quantity: quantity,
+                    icon: cheese.icon
+                });
+            }
+            
+            // Atualizar carrinho
+            updateCart();
+            
+            // Feedback visual
+            event.target.textContent = 'Adicionado!';
+            event.target.style.backgroundColor = '#4CAF50';
+            
+            setTimeout(() => {
+                event.target.textContent = 'Adicionar';
+                event.target.style.backgroundColor = '';
+            }, 1500);
+            
+            // Resetar quantidade para 1
+            quantityInput.value = 1;
+        }
+
+        // Aumentar quantidade
+        function increaseQuantity(event) {
+            const cheeseId = parseInt(event.target.getAttribute('data-id'));
+            const quantityInput = document.getElementById(`qty-${cheeseId}`);
+            let quantity = parseInt(quantityInput.value) || 1;
+            
+            if (quantity < 10) {
+                quantity++;
+                quantityInput.value = quantity;
+            }
+        }
+
+        // Diminuir quantidade
+        function decreaseQuantity(event) {
+            const cheeseId = parseInt(event.target.getAttribute('data-id'));
+            const quantityInput = document.getElementById(`qty-${cheeseId}`);
+            let quantity = parseInt(quantityInput.value) || 1;
+            
+            if (quantity > 1) {
+                quantity--;
+                quantityInput.value = quantity;
+            }
+        }
+
+        // Atualizar carrinho
+        function updateCart() {
+            // Calcular total de itens e valor total
+            cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+            cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+            
+            // Atualizar elementos do DOM
+            cartCountElement.textContent = cartCount;
+            cartTotalElement.textContent = `R$ ${cartTotal.toFixed(2)}`;
+            
+            // Atualizar lista de itens do carrinho
+            cartItemsElement.innerHTML = '';
+            
+            if (cart.length === 0) {
+                emptyCartMessage.style.display = 'block';
+            } else {
+                emptyCartMessage.style.display = 'none';
+                
+                cart.forEach(item => {
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'cart-item';
+                    cartItem.innerHTML = `
+                        <div class="cart-item-details">
+                            <h4>${item.name}</h4>
+                            <div class="cart-item-price">R$ ${item.price.toFixed(2)} x ${item.quantity}</div>
+                        </div>
+                        <div>
+                            <button class="btn remove-item" data-id="${item.id}" style="padding: 8px 15px; font-size: 0.9rem;">Remover</button>
+                        </div>
+                    `;
+                    
+                    cartItemsElement.appendChild(cartItem);
+                });
+                
+                // Adicionar eventos aos botões de remover
+                document.querySelectorAll('.remove-item').forEach(button => {
+                    button.addEventListener('click', removeFromCart);
+                });
+            }
+            
+            // Salvar carrinho no localStorage
+            localStorage.setItem('queijosDeliciaCart', JSON.stringify(cart));
+        }
+
+        // Remover do carrinho
+        function removeFromCart(event) {
+            const cheeseId = parseInt(event.target.getAttribute('data-id'));
+            
+            // Remover item do carrinho
+            cart = cart.filter(item => item.id !== cheeseId);
+            
+            // Atualizar carrinho
+            updateCart();
+        }
+
+        // Sistema de checkout atualizado
+        function checkout() {
+            if (cart.length === 0) {
+                alert('Seu carrinho está vazio. Adicione itens antes de finalizar a compra.');
+                return;
+            }
+            
+            // Atualizar resumo do pedido
+            updateOrderSummary();
+            
+            // Mostrar modal de checkout
+            document.getElementById('checkoutModal').style.display = 'flex';
+            
+            // Preencher cidade automaticamente
+            document.getElementById('customerCity').value = 'Taubaté';
+            
+            // Verificar se há telefone salvo
+            const savedPhone = localStorage.getItem('queijosDeliciaCustomerPhone');
+            if (savedPhone) {
+                document.getElementById('customerPhone').value = savedPhone;
+                document.getElementById('pickupPhone').value = savedPhone;
+            }
+        }
+
+        // Atualizar resumo do pedido
+        function updateOrderSummary() {
+            const checkoutItems = document.getElementById('checkoutItems');
+            const subtotal = cartTotal;
+            let deliveryFee = 0;
+            let discount = 0;
+            
+            // Calcular subtotal
+            checkoutItems.innerHTML = '';
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                const itemElement = document.createElement('div');
+                itemElement.className = 'summary-item';
+                itemElement.innerHTML = `
+                    <span>${item.name} x${item.quantity}</span>
+                    <span>R$ ${itemTotal.toFixed(2)}</span>
+                `;
+                checkoutItems.appendChild(itemElement);
+            });
+            
+            // Verificar tipo de entrega
+            const isDelivery = document.querySelector('.delivery-option.selected').dataset.type === 'delivery';
+            
+            if (isDelivery) {
+                // Taxa de entrega padrão para Taubaté
+                deliveryFee = 3.00;
+                document.getElementById('deliveryWarning').style.display = 'block';
+            } else {
+                // Retirada na loja
+                deliveryFee = 0;
+                document.getElementById('deliveryWarning').style.display = 'none';
+            }
+            
+            // Verificar desconto PIX
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            if (paymentMethod === 'pix') {
+                discount = subtotal * 0.05; // 5% de desconto
+                document.getElementById('discountItem').style.display = 'flex';
+                document.getElementById('pixDiscount').textContent = `- R$ ${discount.toFixed(2)}`;
+            } else {
+                document.getElementById('discountItem').style.display = 'none';
+            }
+            
+            // Calcular total
+            const total = subtotal + deliveryFee - discount;
+            
+            // Atualizar valores
+            document.getElementById('checkoutSubtotal').textContent = `R$ ${subtotal.toFixed(2)}`;
+            document.getElementById('deliveryFee').textContent = `R$ ${deliveryFee.toFixed(2)}`;
+            document.getElementById('checkoutTotal').textContent = `R$ ${total.toFixed(2)}`;
+        }
+
+        // Alternar entre entrega e retirada
+        document.querySelectorAll('.delivery-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // Remover seleção anterior
+                document.querySelectorAll('.delivery-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Selecionar nova opção
+                this.classList.add('selected');
+                
+                // Mostrar formulário correspondente
+                const type = this.dataset.type;
+                if (type === 'delivery') {
+                    document.getElementById('deliveryForm').style.display = 'block';
+                    document.getElementById('pickupForm').style.display = 'none';
+                } else {
+                    document.getElementById('deliveryForm').style.display = 'none';
+                    document.getElementById('pickupForm').style.display = 'block';
+                }
+                
+                // Atualizar resumo
+                updateOrderSummary();
+            });
+        });
+
+        // Mostrar informações de pagamento
+        document.getElementById('paymentMethod').addEventListener('change', function() {
+            const method = this.value;
+            
+            // Esconder todas as informações
+            document.getElementById('pixInfo').style.display = 'none';
+            document.getElementById('transferInfo').style.display = 'none';
+            
+            // Mostrar informações específicas
+            if (method === 'pix') {
+                document.getElementById('pixInfo').style.display = 'block';
+            } else if (method === 'transfer') {
+                document.getElementById('transferInfo').style.display = 'block';
+            }
+            
+            // Atualizar resumo (para aplicar desconto PIX)
+            updateOrderSummary();
+        });
+
+        // Validar formulário de checkout
+        function validateCheckoutForm() {
+            const isDelivery = document.querySelector('.delivery-option.selected').dataset.type === 'delivery';
+            
+            if (isDelivery) {
+                // Validar entrega
+                const name = document.getElementById('customerName').value.trim();
+                const phone = document.getElementById('customerPhone').value.trim();
+                const cep = document.getElementById('customerCEP').value.trim();
+                const address = document.getElementById('customerAddress').value.trim();
+                const neighborhood = document.getElementById('customerNeighborhood').value.trim();
+                
+                if (!name) {
+                    alert('Por favor, informe seu nome completo.');
+                    document.getElementById('customerName').focus();
+                    return false;
+                }
+                
+                if (!phone) {
+                    alert('Por favor, informe seu telefone.');
+                    document.getElementById('customerPhone').focus();
+                    return false;
+                }
+                
+                if (!cep) {
+                    alert('Por favor, informe seu CEP.');
+                    document.getElementById('customerCEP').focus();
+                    return false;
+                }
+                
+                if (!address) {
+                    alert('Por favor, informe seu endereço.');
+                    document.getElementById('customerAddress').focus();
+                    return false;
+                }
+                
+                if (!neighborhood) {
+                    alert('Por favor, informe seu bairro.');
+                    document.getElementById('customerNeighborhood').focus();
+                    return false;
+                }
+            } else {
+                // Validar retirada
+                const name = document.getElementById('pickupName').value.trim();
+                const phone = document.getElementById('pickupPhone').value.trim();
+                
+                if (!name) {
+                    alert('Por favor, informe seu nome para retirada.');
+                    document.getElementById('pickupName').focus();
+                    return false;
+                }
+                
+                if (!phone) {
+                    alert('Por favor, informe seu telefone.');
+                    document.getElementById('pickupPhone').focus();
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        // Coletar dados de entrega
+        function collectDeliveryData() {
+            return {
+                type: 'delivery',
+                name: document.getElementById('customerName').value.trim(),
+                phone: document.getElementById('customerPhone').value.trim(),
+                whatsapp: document.getElementById('customerWhatsapp').value.trim(),
+                cep: document.getElementById('customerCEP').value.trim(),
+                address: document.getElementById('customerAddress').value.trim(),
+                neighborhood: document.getElementById('customerNeighborhood').value.trim(),
+                city: document.getElementById('customerCity').value.trim(),
+                complement: document.getElementById('customerComplement').value.trim(),
+                reference: document.getElementById('customerReference').value.trim()
+            };
+        }
+
+        // Coletar dados de retirada
+        function collectPickupData() {
+            return {
+                type: 'pickup',
+                name: document.getElementById('pickupName').value.trim(),
+                phone: document.getElementById('pickupPhone').value.trim()
+            };
+        }
+
+        // Coletar dados do pedido
+        function collectOrderData(customerData) {
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const subtotal = cartTotal;
+            const deliveryFee = customerData.type === 'delivery' ? 3.00 : 0;
+            const discount = paymentMethod === 'pix' ? subtotal * 0.05 : 0;
+            const total = subtotal + deliveryFee - discount;
+            
+            // Formatar itens do pedido
+            const items = cart.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                total: item.price * item.quantity
+            }));
+            
+            // Gerar ID do pedido
+            const orderId = generateOrderId();
+            
+            return {
+                id: orderId,
+                customer: customerData,
+                items: items,
+                subtotal: subtotal,
+                deliveryFee: deliveryFee,
+                discount: discount,
+                total: total,
+                paymentMethod: paymentMethod,
+                status: 'pendente',
+                date: new Date().toISOString(),
+                notes: ''
+            };
+        }
+
+        // Gerar ID único para o pedido
+        function generateOrderId() {
+            const date = new Date();
+            const year = date.getFullYear().toString().substr(-2);
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            
+            return `${year}${month}${day}${random}`;
+        }
+
+        // Obter nome do método de pagamento
+        function getPaymentMethodName(method) {
+            const methods = {
+                'pix': 'PIX',
+                'cash': 'Dinheiro',
+                'card': 'Cartão',
+                'transfer': 'Transferência'
+            };
+            return methods[method] || method;
+        }
+
+        // Salvar pedido
+        function saveOrder(orderData) {
+            // Carregar pedidos existentes
+            const orders = JSON.parse(localStorage.getItem('queijosDeliciaOrders')) || [];
+            
+            // Adicionar novo pedido
+            orders.push(orderData);
+            
+            // Salvar no localStorage
+            localStorage.setItem('queijosDeliciaOrders', JSON.stringify(orders));
+            
+            // Criar notificação para o admin
+            const notifications = JSON.parse(localStorage.getItem('queijosDeliciaNotifications')) || [];
+            notifications.unshift({
+                id: notifications.length + 1,
+                title: "Novo pedido recebido",
+                message: `Pedido #${orderData.id} de ${orderData.customer.name} - R$ ${orderData.total.toFixed(2)}`,
+                time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                read: false
+            });
+            
+            localStorage.setItem('queijosDeliciaNotifications', JSON.stringify(notifications));
+            
+            // Limpar carrinho
+            cart = [];
+            updateCart();
+            localStorage.removeItem('queijosDeliciaCart');
+        }
+
+        // Mostrar confirmação do pedido
+        function showOrderConfirmation(orderData) {
+            // Esconder formulário
+            document.getElementById('checkoutBody').style.display = 'none';
+            
+            // Mostrar status
+            document.getElementById('paymentStatus').style.display = 'block';
+            
+            // Configurar detalhes do pedido
+            const orderDetails = document.getElementById('orderDetails');
+            const deliveryType = orderData.customer.type === 'delivery' ? 'Entrega' : 'Retirada na loja';
+            const paymentMethodName = getPaymentMethodName(orderData.paymentMethod);
+            
+            orderDetails.innerHTML = `
+                <p><strong>Nº do Pedido:</strong> #${orderData.id}</p>
+                <p><strong>Cliente:</strong> ${orderData.customer.name}</p>
+                <p><strong>Telefone:</strong> ${orderData.customer.phone}</p>
+                <p><strong>Tipo:</strong> ${deliveryType}</p>
+                ${orderData.customer.type === 'delivery' ? `
+                    <p><strong>Endereço:</strong> ${orderData.customer.address}, ${orderData.customer.neighborhood}</p>
+                    <p><strong>Cidade:</strong> ${orderData.customer.city}</p>
+                ` : ''}
+                <p><strong>Pagamento:</strong> ${paymentMethodName}</p>
+                <p><strong>Total:</strong> R$ ${orderData.total.toFixed(2)}</p>
+                <p><strong>Status:</strong> <span style="color: #ff9800;">Pendente</span></p>
+                <div style="margin-top: 15px; padding: 10px; background: #e8f5e9; border-radius: 5px;">
+                    <i class="fas fa-info-circle"></i> 
+                    Seu pedido foi recebido! Entraremos em contato para confirmar.
+                </div>
+            `;
+            
+            // Configurar botão de fechar
+            document.getElementById('closeOrderBtn').onclick = function() {
+                document.getElementById('checkoutModal').style.display = 'none';
+                document.getElementById('checkoutBody').style.display = 'block';
+                document.getElementById('paymentStatus').style.display = 'none';
+                
+                // Limpar formulário
+                document.getElementById('checkoutBody').querySelectorAll('input').forEach(input => {
+                    if (input.type !== 'hidden' && !input.readOnly) {
+                        input.value = '';
+                    }
+                });
+            };
+        }
+
+        // Confirmar pedido
+        document.getElementById('confirmOrderBtn').addEventListener('click', function() {
+            // Validar formulário
+            if (!validateCheckoutForm()) {
+                return;
+            }
+            
+            // Coletar dados do cliente
+            const isDelivery = document.querySelector('.delivery-option.selected').dataset.type === 'delivery';
+            const customerData = isDelivery ? collectDeliveryData() : collectPickupData();
+            
+            // Coletar dados do pedido
+            const orderData = collectOrderData(customerData);
+            
+            // Salvar pedido
+            saveOrder(orderData);
+            
+            // Mostrar confirmação
+            showOrderConfirmation(orderData);
+            
+            // Salvar telefone para futuras compras
+            if (customerData.phone) {
+                localStorage.setItem('queijosDeliciaCustomerPhone', customerData.phone);
+            }
+        });
+
+        // Fechar modal de checkout
+        document.getElementById('closeCheckout').addEventListener('click', function() {
+            document.getElementById('checkoutModal').style.display = 'none';
+        });
+
+        // Fechar modal ao clicar fora
+        document.getElementById('checkoutModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+
+        // Atualizar checkout quando alterar qualquer campo
+        document.getElementById('checkoutBody').addEventListener('input', function() {
+            updateOrderSummary();
+        });
+
+        // Event Listeners
+        cartIcon.addEventListener('click', () => {
+            cartModal.classList.add('active');
+        });
+
+        closeCart.addEventListener('click', () => {
+            cartModal.classList.remove('active');
+        });
+
+        // Substituir o antigo checkout pela nova função
+        checkoutBtn.addEventListener('click', checkout);
+
+        // Fechar carrinho ao clicar fora
+        document.addEventListener('click', (event) => {
+            if (!cartModal.contains(event.target) && !cartIcon.contains(event.target) && cartModal.classList.contains('active')) {
+                cartModal.classList.remove('active');
+            }
+        });
+
+        // Carregar carrinho salvo
+        function loadSavedCart() {
+            const savedCart = JSON.parse(localStorage.getItem('queijosDeliciaCart'));
+            if (savedCart) {
+                cart = savedCart;
+                updateCart();
+            }
+        }
+
+        // Acesso à área admin com verificação de segurança
+        function accessAdminArea() {
+            // Verificar se há sessão ativa
+            const isLoggedIn = localStorage.getItem('queijosDeliciaLoggedIn') === 'true' || 
+                              sessionStorage.getItem('queijosDeliciaLoggedIn') === 'true';
+            
+            if (isLoggedIn) {
+                // Verificar tempo da sessão
+                const loginTime = localStorage.getItem('queijosDeliciaLoginTime') || 
+                                 sessionStorage.getItem('queijosDeliciaLoginTime');
+                
+                if (loginTime) {
+                    const now = new Date().getTime();
+                    const thirtyMinutes = 30 * 60 * 1000;
+                    
+                    if (now - parseInt(loginTime) > thirtyMinutes) {
+                        // Sessão expirada
+                        localStorage.removeItem('queijosDeliciaLoggedIn');
+                        localStorage.removeItem('queijosDeliciaUser');
+                        localStorage.removeItem('queijosDeliciaLoginTime');
+                        sessionStorage.clear();
+                        
+                        alert('Sua sessão expirou. Por favor, faça login novamente.');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                }
+                
+                // Sessão válida, redirecionar para o painel
+                window.location.href = 'painel-admin.html';
+            } else {
+                // Não está logado, perguntar se quer fazer login
+                if (confirm('Acesso restrito aos administradores. Deseja fazer login?')) {
+                    window.location.href = 'login.html';
+                }
+            }
+        }
+
+        // ===== SISTEMA DE SINCRONIZAÇÃO COM PAINEL ADMIN =====
+        
+        // Sincronizar com painel admin
+        function syncWithAdminPanel() {
+            // Verificar se o painel admin atualizou os dados
+            const lastAdminUpdate = localStorage.getItem('queijosDeliciaLastAdminUpdate');
+            const lastSiteUpdate = localStorage.getItem('queijosDeliciaLastSiteUpdate') || 0;
+            
+            if (lastAdminUpdate && parseInt(lastAdminUpdate) > parseInt(lastSiteUpdate)) {
+                // Recarregar queijos se houve atualização no painel
+                const oldCheeseCount = cheeses.length;
+                cheeses = loadCheesesData();
+                
+                if (oldCheeseCount !== cheeses.length) {
+                    // Se o número de queijos mudou, atualizar display
+                    displayCheeses();
+                    
+                    // Mostrar notificação
+                    showUpdateNotification();
+                    console.log(`Cardápio atualizado! Agora temos ${cheeses.length} queijos.`);
+                }
+                
+                // Atualizar timestamp do site
+                localStorage.setItem('queijosDeliciaLastSiteUpdate', Date.now().toString());
+                
+                return true;
+            }
+            return false;
+        }
+        
+        // Mostrar notificação de atualização
+        function showUpdateNotification() {
+            // Verificar se já existe uma notificação
+            if (document.querySelector('.update-notification')) {
+                return;
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = 'update-notification';
+            notification.innerHTML = `
+                <i class="fas fa-sync-alt"></i>
+                <div style="flex: 1;">
+                    <strong>Cardápio atualizado!</strong>
+                    <p style="margin: 5px 0 0; font-size: 0.9rem;">Novos queijos disponíveis.</p>
+                </div>
+                <button onclick="this.parentElement.remove()" 
+                        style="background: none; border: none; color: white; cursor: pointer; padding: 0;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remover automaticamente após 5 segundos
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+        
+        // Marcar atualização (usado pelo painel admin)
+        function markUpdate() {
+            localStorage.setItem('queijosDeliciaLastUpdate', new Date().getTime().toString());
+        }
+        
+        // Inicializar aplicativo
+        function initApp() {
+            adjustForMobile();
+            
+            // Sincronizar com painel admin antes de mostrar
+            syncWithAdminPanel();
+            
+            displayCheeses();
+            loadSavedCart();
+            updateCart();
+            
+            // Inicializar informações de pagamento
+            document.getElementById('paymentMethod').dispatchEvent(new Event('change'));
+            
+            // Verificar sincronização periodicamente (a cada 10 segundos)
+            setInterval(syncWithAdminPanel, 10000);
+            
+            // Marcar inicialização
+            markUpdate();
+            
+            // Log de inicialização
+            console.log('Aplicativo iniciado com', cheeses.length, 'queijos');
+        }
+
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', initApp);
+        
+        // Ajustar quando a janela for redimensionada
+        window.addEventListener('resize', adjustForMobile);
+        window.addEventListener('orientationchange', function() {
+            setTimeout(adjustForMobile, 100);
+        });
+    </script>
+</body>
+</html>

@@ -822,32 +822,22 @@
             query, 
             where, 
             addDoc, 
-            serverTimestamp,
-            onSnapshot
+            serverTimestamp
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+        const firebaseConfig = {
+            apiKey: "AIzaSyAm99ao4MlTWECHmU0f84wHdkbyJGPwcLg",
+            authDomain: "queijos-delicia.firebaseapp.com",
+            projectId: "queijos-delicia",
+            storageBucket: "queijos-delicia.appspot.com",
+            messagingSenderId: "320335459972",
+            appId: "1:320335459972:web:ce6890d5b5e7974ca234d1"
+        };
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAm99ao4MlTWECHmU0f84wHdkbyJGPwcLg",
-  authDomain: "queijos-delicia.firebaseapp.com",
-  projectId: "queijos-delicia",
-  storageBucket: "queijos-delicia.firebasestorage.app",
-  messagingSenderId: "320335459972",
-  appId: "1:320335459972:web:ce6890d5b5e7974ca234d1",
-  measurementId: "G-M5KVKGC5PL"
-};
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-        
         // Função para carregar queijos do Firestore
         async function loadCheesesFromFirebase() {
             try {
@@ -879,7 +869,7 @@ const analytics = getAnalytics(app);
                 hideLoading();
                 console.error("Erro ao carregar queijos do Firebase:", error);
                 showError("Erro ao carregar produtos. Usando dados locais como backup.");
-                return loadCheesesData();
+                return null;
             }
         }
 
@@ -1388,7 +1378,7 @@ const analytics = getAnalytics(app);
                     return firebaseCheeses;
                 }
             } catch (error) {
-                console.log("Usando dados locais como fallback");
+                console.log("Erro ao carregar do Firebase, usando dados locais como fallback");
             }
             
             // Fallback para dados locais
@@ -1993,6 +1983,11 @@ const analytics = getAnalytics(app);
                         input.value = '';
                     }
                 });
+                
+                // Limpar carrinho
+                cart = [];
+                updateCart();
+                localStorage.removeItem('queijosDeliciaCart');
             };
         }
 
@@ -2127,7 +2122,7 @@ const analytics = getAnalytics(app);
                 const oldCheeseCount = cheeses.length;
                 const newCheeses = await window.loadCheesesFromFirebase();
                 
-                if (newCheeses.length !== oldCheeseCount) {
+                if (newCheeses && newCheeses.length !== oldCheeseCount) {
                     // Atualizar lista de queijos
                     cheeses = newCheeses;
                     await displayCheeses();

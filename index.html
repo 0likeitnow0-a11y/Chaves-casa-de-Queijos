@@ -391,26 +391,6 @@
             transform: scale(1.1);
         }
         
-        /* Botão Admin escondido */
-        .admin-btn {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            background: #25D366;
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            text-decoration: none;
-            z-index: 99;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            display: none; /* Escondido */
-        }
-        
         /* Responsivo */
         @media (max-width: 768px) {
             .delivery-options {
@@ -426,27 +406,24 @@
             }
         }
         
-        /* Confirmação rápida */
-        .confirmation {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-            z-index: 3000;
-            text-align: center;
-            display: none;
-            max-width: 400px;
-            width: 90%;
+        /* Aviso de entrega - COR ALTERADA PARA VERDE CLARO */
+        .delivery-info {
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #2e7d32;
         }
         
-        .confirmation-icon {
-            font-size: 50px;
-            color: #25D366;
-            margin-bottom: 20px;
+        .delivery-info strong {
+            color: #1b5e20;
+        }
+        
+        .delivery-info i {
+            color: #4CAF50;
+            margin-right: 8px;
         }
     </style>
 </head>
@@ -488,6 +465,13 @@
                 <p><strong>Chaves Casa de Queijos</strong></p>
                 <p>📞 WhatsApp: (12) 98872-4519</p>
                 <p>📍 Rua Benedicto José de Moraes, 60 - Chácara Belo Horizonte, Taubaté SP, 12092-786</p>
+                <div class="delivery-info" style="max-width: 500px; margin: 20px auto;">
+                    <p><strong>📦 Informações Importantes:</strong></p>
+                    <p>• Entregas somente em Taubaté - R$ 3,00</p>
+                    <p>• Para outras cidades, entrar em contato</p>
+                    <p>• Pedido enviado em até 2 dias úteis</p>
+                    <p>• Retirada na loja: Rua Benedicto José de Moraes, 60</p>
+                </div>
             </div>
             <p>© 2023 Chaves Casa de Queijos</p>
         </div>
@@ -524,14 +508,21 @@
             </div>
             
             <div class="checkout-body">
+                <div class="delivery-info">
+                    <p><strong>📦 Informações de Entrega:</strong></p>
+                    <p>• Entregas somente em Taubaté - R$ 3,00</p>
+                    <p>• Para outras cidades, favor entrar em contato</p>
+                    <p>• Pedido será enviado em até 2 dias úteis</p>
+                </div>
+                
                 <form id="orderForm">
                     <h4>1. Tipo de Entrega</h4>
                     <div class="delivery-options">
-                        <div class="delivery-option selected" data-type="pickup">
+                        <div class="delivery-option selected" data-type="pickup" id="pickupOption">
                             🏪 Retirar na Loja
                         </div>
-                        <div class="delivery-option" data-type="delivery">
-                            🚚 Entrega
+                        <div class="delivery-option" data-type="delivery" id="deliveryOption">
+                            🚚 Entrega (Taubaté)
                         </div>
                     </div>
                     
@@ -580,8 +571,8 @@
                             <input type="tel" id="pickupPhone" class="form-control" required placeholder="(12) 98872-4519">
                         </div>
                         
-                        <div style="background:#f9f9f9; padding:15px; border-radius:5px; margin-bottom:20px;">
-                            <p><strong>Local de retirada:</strong></p>
+                        <div class="delivery-info" style="margin-bottom:20px;">
+                            <p><strong>📍 Local de retirada:</strong></p>
                             <p>Chaves Casa de Queijos</p>
                             <p>Rua Benedicto José de Moraes, 60</p>
                             <p>Chácara Belo Horizonte, Taubaté/SP</p>
@@ -591,16 +582,16 @@
                     
                     <h4>3. Forma de Pagamento</h4>
                     <div class="payment-options">
-                        <div class="payment-option selected" data-method="pix">
+                        <div class="payment-option selected" data-method="pix" id="pixOption">
                             💰 PIX (5% desc.)
                         </div>
-                        <div class="payment-option" data-method="cash">
-                            💵 Dinheiro
+                        <div class="payment-option" data-method="cash" id="cashOption">
+                            💵 Dinheiro (5% desc.)
                         </div>
-                        <div class="payment-option" data-method="card">
+                        <div class="payment-option" data-method="card" id="cardOption">
                             💳 Cartão
                         </div>
-                        <div class="payment-option" data-method="transfer">
+                        <div class="payment-option" data-method="transfer" id="transferOption">
                             🏦 Transferência
                         </div>
                     </div>
@@ -626,20 +617,16 @@
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn" style="width:100%; margin-top:20px; background:#25D366;">
+                    <div class="delivery-info" style="margin-top: 20px;">
+                        <p><strong>⏰ Prazo de Entrega:</strong> Seu pedido será enviado em até 2 dias úteis após confirmação.</p>
+                    </div>
+                    
+                    <button type="button" class="btn" style="width:100%; margin-top:20px; background:#25D366;" id="submitOrderBtn">
                         📤 Enviar Pedido via WhatsApp
                     </button>
                 </form>
             </div>
         </div>
-    </div>
-    
-    <!-- Confirmação rápida -->
-    <div class="confirmation" id="confirmation">
-        <div class="confirmation-icon">✅</div>
-        <h3>Pedido Confirmado!</h3>
-        <p>Seu pedido será enviado para o WhatsApp...</p>
-        <p style="font-size:14px; color:#666; margin-top:10px;">Abrindo WhatsApp em instantes...</p>
     </div>
     
     <!-- Botão WhatsApp flutuante -->
@@ -665,8 +652,7 @@
         const cartTotal = document.getElementById('cartTotal');
         const emptyCartMessage = document.getElementById('emptyCartMessage');
         const checkoutModal = document.getElementById('checkoutModal');
-        const orderForm = document.getElementById('orderForm');
-        const confirmation = document.getElementById('confirmation');
+        const submitOrderBtn = document.getElementById('submitOrderBtn');
         
         // Carregar queijos
         function loadCheeses() {
@@ -891,33 +877,6 @@
             document.getElementById('discountRow').style.display = discount > 0 ? 'flex' : 'none';
         }
         
-        // Alternar entre entrega e retirada
-        document.querySelectorAll('.delivery-option').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.delivery-option').forEach(opt => {
-                    opt.classList.remove('selected');
-                });
-                this.classList.add('selected');
-                
-                const isDelivery = this.dataset.type === 'delivery';
-                document.getElementById('deliveryInfo').style.display = isDelivery ? 'block' : 'none';
-                document.getElementById('pickupInfo').style.display = isDelivery ? 'none' : 'block';
-                
-                updateOrderSummary();
-            });
-        });
-        
-        // Alternar forma de pagamento
-        document.querySelectorAll('.payment-option').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.payment-option').forEach(opt => {
-                    opt.classList.remove('selected');
-                });
-                this.classList.add('selected');
-                updateOrderSummary();
-            });
-        });
-        
         // Gerar número do pedido
         function generateOrderNumber() {
             const date = new Date();
@@ -941,14 +900,14 @@
         
         // Gerar mensagem para WhatsApp
         function generateWhatsAppMessage(orderData) {
-            let message = `*NOVO PEDIDO - CHAVES CASA DE QUEIJOS*%0A%0A`;
+            let message = `*🍰 NOVO PEDIDO - CHAVES CASA DE QUEIJOS*%0A%0A`;
             message += `*Pedido:* #${orderData.id}%0A`;
             message += `*Data:* ${orderData.date}%0A%0A`;
             
             message += `*👤 CLIENTE*%0A`;
             message += `Nome: ${orderData.customer.name}%0A`;
             message += `Telefone: ${orderData.customer.phone}%0A`;
-            message += `Tipo: ${orderData.customer.type === 'delivery' ? 'Entrega' : 'Retirada'}%0A`;
+            message += `Tipo: ${orderData.customer.type === 'delivery' ? 'Entrega' : 'Retirada na Loja'}%0A`;
             
             if (orderData.customer.type === 'delivery') {
                 message += `Endereço: ${orderData.customer.address}%0A`;
@@ -959,6 +918,9 @@
                 if (orderData.customer.reference) {
                     message += `Referência: ${orderData.customer.reference}%0A`;
                 }
+            } else {
+                message += `Retirar na loja: Rua Benedicto José de Moraes, 60%0A`;
+                message += `Chácara Belo Horizonte, Taubaté/SP%0A`;
             }
             
             message += `%0A*📦 ITENS DO PEDIDO*%0A`;
@@ -983,47 +945,107 @@
             message += `*💳 FORMA DE PAGAMENTO*%0A`;
             message += `${getPaymentMethodName(orderData.paymentMethod)}%0A%0A`;
             
-            message += `_Pedido gerado pelo site www.chavesqueijos.com.br_`;
+            message += `*⏰ PRAZO*%0A`;
+            message += `Pedido será enviado em até 2 dias úteis após confirmação.%0A%0A`;
+            
+            message += `*📍 ENTREGA*%0A`;
+            message += `Entregas somente em Taubaté.%0A`;
+            message += `Para outras cidades, favor entrar em contato.%0A%0A`;
+            
+            message += `_Pedido gerado via site_`;
             
             return message;
         }
         
-        // Confirmar pedido e enviar para WhatsApp
-        orderForm.addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Configurar eventos de clique para entrega/retirada
+        document.querySelectorAll('.delivery-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.delivery-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                
+                const isDelivery = this.dataset.type === 'delivery';
+                document.getElementById('deliveryInfo').style.display = isDelivery ? 'block' : 'none';
+                document.getElementById('pickupInfo').style.display = isDelivery ? 'none' : 'block';
+                
+                updateOrderSummary();
+            });
+        });
+        
+        // Configurar eventos de pagamento
+        document.querySelectorAll('.payment-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.payment-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                updateOrderSummary();
+            });
+        });
+        
+        // Evento para o botão de enviar pedido
+        submitOrderBtn.addEventListener('click', function() {
+            processOrder();
+        });
+        
+        // Função principal para processar o pedido
+        function processOrder() {
+            console.log("Processando pedido...");
             
-            // Coletar dados
+            // Verificar se há itens no carrinho
+            if (cart.length === 0) {
+                alert('Seu carrinho está vazio. Adicione itens antes de fazer o pedido.');
+                return;
+            }
+            
+            // Determinar tipo de entrega
             const isDelivery = document.querySelector('.delivery-option.selected').dataset.type === 'delivery';
             const paymentMethod = document.querySelector('.payment-option.selected').dataset.method;
             
             let customerInfo = {};
             
+            // Validar dados com base no tipo de entrega
             if (isDelivery) {
+                // Validação para entrega
+                const name = document.getElementById('deliveryName').value.trim();
+                const phone = document.getElementById('deliveryPhone').value.trim();
+                const address = document.getElementById('deliveryAddress').value.trim();
+                const neighborhood = document.getElementById('deliveryNeighborhood').value.trim();
+                
+                console.log("Dados entrega:", {name, phone, address, neighborhood});
+                
+                if (!name || !phone || !address || !neighborhood) {
+                    alert('Por favor, preencha todos os campos obrigatórios para entrega!');
+                    return;
+                }
+                
                 customerInfo = {
                     type: 'delivery',
-                    name: document.getElementById('deliveryName').value.trim(),
-                    phone: document.getElementById('deliveryPhone').value.trim(),
-                    address: document.getElementById('deliveryAddress').value.trim(),
-                    neighborhood: document.getElementById('deliveryNeighborhood').value.trim(),
+                    name: name,
+                    phone: phone,
+                    address: address,
+                    neighborhood: neighborhood,
                     complement: document.getElementById('deliveryComplement').value.trim(),
                     reference: document.getElementById('deliveryReference').value.trim()
                 };
+            } else {
+                // Validação para retirada
+                const name = document.getElementById('pickupName').value.trim();
+                const phone = document.getElementById('pickupPhone').value.trim();
                 
-                if (!customerInfo.name || !customerInfo.phone || !customerInfo.address || !customerInfo.neighborhood) {
-                    alert('Preencha todos os campos obrigatórios para entrega!');
+                console.log("Dados retirada:", {name, phone});
+                
+                if (!name || !phone) {
+                    alert('Por favor, preencha seu nome e telefone para retirada!');
                     return;
                 }
-            } else {
+                
                 customerInfo = {
                     type: 'pickup',
-                    name: document.getElementById('pickupName').value.trim(),
-                    phone: document.getElementById('pickupPhone').value.trim()
+                    name: name,
+                    phone: phone
                 };
-                
-                if (!customerInfo.name || !customerInfo.phone) {
-                    alert('Preencha seu nome e telefone para retirada!');
-                    return;
-                }
             }
             
             // Calcular valores
@@ -1032,7 +1054,7 @@
             const discount = (paymentMethod === 'pix' || paymentMethod === 'cash') ? subtotal * 0.05 : 0;
             const total = subtotal + deliveryFee - discount;
             
-            // Criar pedido
+            // Criar objeto do pedido
             currentOrder = {
                 id: generateOrderNumber(),
                 customer: customerInfo,
@@ -1046,51 +1068,63 @@
                 status: 'pendente'
             };
             
-            // Salvar pedido
+            console.log("Pedido criado:", currentOrder);
+            
+            // Salvar pedido no localStorage (para histórico)
             const orders = JSON.parse(localStorage.getItem('chavesQueijosOrders')) || [];
             orders.push(currentOrder);
             localStorage.setItem('chavesQueijosOrders', JSON.stringify(orders));
             
-            // Mostrar confirmação
-            confirmation.style.display = 'block';
-            closeCheckout();
+            // Enviar para WhatsApp
+            sendOrderToWhatsApp();
+        }
+        
+        // Função para enviar pedido para WhatsApp
+        function sendOrderToWhatsApp() {
+            if (!currentOrder) {
+                alert('Erro: Nenhum pedido para enviar.');
+                return;
+            }
             
-            // Gerar mensagem e enviar para WhatsApp após 1 segundo
+            // Gerar mensagem para WhatsApp
+            const message = generateWhatsAppMessage(currentOrder);
+            const phone = "5512988724519";
+            
+            // Criar URL do WhatsApp
+            const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
+            
+            console.log("URL WhatsApp:", whatsappUrl);
+            
+            // Mostrar mensagem de confirmação
+            alert('✅ Pedido gerado com sucesso!\n\n' +
+                  'Você será redirecionado para o WhatsApp para enviar o pedido.\n\n' +
+                  'Por favor, clique em "ENVIAR" no WhatsApp para finalizar.');
+            
+            // Redirecionar para WhatsApp (abre em nova aba)
+            window.open(whatsappUrl, '_blank');
+            
+            // Limpar carrinho após alguns segundos
             setTimeout(() => {
-                const message = generateWhatsAppMessage(currentOrder);
-                const phone = "5512988724519";
-                const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
+                cart = [];
+                updateCart();
+                localStorage.removeItem('chavesQueijosCart');
                 
-                // Abrir WhatsApp em nova aba
-                window.open(whatsappUrl, '_blank');
+                // Resetar formulário
+                document.getElementById('pickupName').value = '';
+                document.getElementById('pickupPhone').value = '';
+                document.getElementById('deliveryName').value = '';
+                document.getElementById('deliveryPhone').value = '';
+                document.getElementById('deliveryAddress').value = '';
+                document.getElementById('deliveryNeighborhood').value = '';
+                document.getElementById('deliveryComplement').value = '';
+                document.getElementById('deliveryReference').value = '';
                 
-                // Fechar confirmação após 2 segundos
-                setTimeout(() => {
-                    confirmation.style.display = 'none';
-                    
-                    // Limpar carrinho
-                    cart = [];
-                    updateCart();
-                    localStorage.removeItem('chavesQueijosCart');
-                    
-                    // Limpar formulário
-                    orderForm.reset();
-                    
-                    // Resetar seleções
-                    document.querySelectorAll('.delivery-option').forEach((opt, index) => {
-                        opt.classList.remove('selected');
-                        if (index === 0) opt.classList.add('selected');
-                    });
-                    document.getElementById('deliveryInfo').style.display = 'none';
-                    document.getElementById('pickupInfo').style.display = 'block';
-                    
-                    document.querySelectorAll('.payment-option').forEach((opt, index) => {
-                        opt.classList.remove('selected');
-                        if (index === 0) opt.classList.add('selected');
-                    });
-                }, 2000);
-            }, 1000);
-        });
+                closeCheckout();
+                
+                // Atualizar resumo (para mostrar R$ 0,00)
+                updateOrderSummary();
+            }, 2000);
+        }
         
         // Carregar carrinho salvo
         function loadCart() {
@@ -1106,9 +1140,37 @@
             loadCheeses();
             loadCart();
             
-            // Configurar eventos para atualizar resumo
-            document.getElementById('orderForm').addEventListener('input', updateOrderSummary);
-            document.getElementById('orderForm').addEventListener('change', updateOrderSummary);
+            // Atualizar resumo quando houver mudanças nos campos
+            const inputs = document.querySelectorAll('#orderForm input, #orderForm select');
+            inputs.forEach(input => {
+                input.addEventListener('input', updateOrderSummary);
+                input.addEventListener('change', updateOrderSummary);
+            });
+            
+            // Configurar eventos iniciais para os botões de entrega
+            const deliveryOptions = document.querySelectorAll('.delivery-option');
+            deliveryOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    deliveryOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    
+                    const isDelivery = this.dataset.type === 'delivery';
+                    document.getElementById('deliveryInfo').style.display = isDelivery ? 'block' : 'none';
+                    document.getElementById('pickupInfo').style.display = isDelivery ? 'none' : 'block';
+                    
+                    updateOrderSummary();
+                });
+            });
+            
+            // Configurar eventos iniciais para os botões de pagamento
+            const paymentOptions = document.querySelectorAll('.payment-option');
+            paymentOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    paymentOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    updateOrderSummary();
+                });
+            });
         });
         
         // Fechar modais ao clicar fora

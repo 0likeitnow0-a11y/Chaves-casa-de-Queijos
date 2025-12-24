@@ -12,7 +12,7 @@
         }
         
         .container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             background: white;
             padding: 30px;
@@ -36,7 +36,7 @@
             font-weight: bold;
         }
         
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
@@ -94,6 +94,19 @@
             display: none;
         }
         
+        .category-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .category-nacional { background: #e8f5e9; color: #2e7d32; }
+        .category-importado { background: #e3f2fd; color: #1565c0; }
+        .category-artesanal { background: #fff3e0; color: #ef6c00; }
+        
         .whatsapp-btn {
             position: fixed;
             bottom: 20px;
@@ -120,14 +133,14 @@
 </head>
 <body>
     <div class="container">
-        <h1>✏️ Adicionar Queijo</h1>
+        <h1>✏️ Gerenciar Queijos</h1>
         
         <div class="notification" id="notification"></div>
         
         <form id="cheeseForm">
             <div class="form-group">
                 <label>Nome do Queijo *</label>
-                <input type="text" id="cheeseName" required placeholder="Ex: Queijo Minas">
+                <input type="text" id="cheeseName" required placeholder="Ex: Queijo Minas Frescal">
             </div>
             
             <div class="form-group">
@@ -141,6 +154,21 @@
             </div>
             
             <div class="form-group">
+                <label>Categoria *</label>
+                <select id="cheeseCategory" required>
+                    <option value="">Selecione uma categoria</option>
+                    <option value="nacional">Nacional</option>
+                    <option value="importado">Importado</option>
+                    <option value="artesanal">Artesanal</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Peso (opcional)</label>
+                <input type="text" id="cheeseWeight" placeholder="Ex: 500g">
+            </div>
+            
+            <div class="form-group">
                 <label>Emoji (opcional)</label>
                 <input type="text" id="cheeseIcon" placeholder="🧀">
             </div>
@@ -150,6 +178,14 @@
         
         <div class="cheese-list">
             <h2>📋 Queijos Cadastrados (<span id="cheeseCount">0</span>)</h2>
+            <div style="margin-bottom: 20px;">
+                <button onclick="exportCheeses()" style="background: #6c757d; width: auto; padding: 8px 15px;">
+                    📥 Exportar Queijos
+                </button>
+                <button onclick="importCheeses()" style="background: #17a2b8; width: auto; padding: 8px 15px; margin-left: 10px;">
+                    📤 Importar Queijos
+                </button>
+            </div>
             <div id="cheeseList"></div>
         </div>
     </div>
@@ -160,8 +196,149 @@
     </a>
     
     <script>
-        // Carregar queijos
-        let cheeses = JSON.parse(localStorage.getItem('chavesQueijosCheeses')) || [];
+        // Carregar queiros com categorias
+        let cheeses = JSON.parse(localStorage.getItem('chavesQueijosCheeses')) || [
+            // Queijos Nacionais
+            {
+                id: 1,
+                name: "Queijo Minas Frescal",
+                price: 24.90,
+                description: "Tradicional queijo mineiro, leve e de sabor suave. Perfeito para o café da manhã.",
+                category: "nacional",
+                weight: "500g",
+                icon: "🥛"
+            },
+            {
+                id: 2,
+                name: "Queijo Prato",
+                price: 32.50,
+                description: "Queijo amarelo de sabor suave e textura macia. Ideal para sanduíches e lanches.",
+                category: "nacional",
+                weight: "500g",
+                icon: "🧀"
+            },
+            {
+                id: 3,
+                name: "Queijo Canastra",
+                price: 56.90,
+                description: "Queijo artesanal mineiro com sabor marcante e textura única. Feito com leite cru.",
+                category: "artesanal",
+                weight: "500g",
+                icon: "🏞️"
+            },
+            {
+                id: 4,
+                name: "Queijo Coalho",
+                price: 28.70,
+                description: "Típico do Nordeste brasileiro, perfeito para assar na brasa. Sabor suave e textura firme.",
+                category: "nacional",
+                weight: "500g",
+                icon: "🔥"
+            },
+            {
+                id: 5,
+                name: "Queijo Meia Cura",
+                price: 42.30,
+                description: "Queijo com maturação média, sabor equilibrado entre suave e intenso.",
+                category: "nacional",
+                weight: "500g",
+                icon: "⏳"
+            },
+            {
+                id: 6,
+                name: "Requeijão Cremoso",
+                price: 18.90,
+                description: "Cremoso e saboroso, perfeito para passar no pão ou usar em receitas.",
+                category: "nacional",
+                weight: "300g",
+                icon: "🥄"
+            },
+            
+            // Queijos Importados
+            {
+                id: 7,
+                name: "Queijo Gouda",
+                price: 67.80,
+                description: "Queijo holandês de sabor adocicado e textura cremosa. Maturado por 6 meses.",
+                category: "importado",
+                weight: "500g",
+                icon: "🇳🇱"
+            },
+            {
+                id: 8,
+                name: "Queijo Brie",
+                price: 72.40,
+                description: "Queijo francês de casca branca e mofada, cremoso e de sabor delicado.",
+                category: "importado",
+                weight: "250g",
+                icon: "🇫🇷"
+            },
+            {
+                id: 9,
+                name: "Queijo Parmesão",
+                price: 88.90,
+                description: "Queijo italiano duro e granular, sabor intenso. Perfeito para ralar sobre massas.",
+                category: "importado",
+                weight: "500g",
+                icon: "🍝"
+            },
+            {
+                id: 10,
+                name: "Queijo Provolone",
+                price: 61.30,
+                description: "Queijo italiano defumado, de sabor forte e textura firme. Ideal para petiscos.",
+                category: "importado",
+                weight: "500g",
+                icon: "🇮🇹"
+            },
+            {
+                id: 11,
+                name: "Queijo Cheddar",
+                price: 59.90,
+                description: "Queijo inglês de cor laranja, sabor forte e textura firme.",
+                category: "importado",
+                weight: "500g",
+                icon: "🇬🇧"
+            },
+            
+            // Queijos Artesanais
+            {
+                id: 12,
+                name: "Queijo de Búfala",
+                price: 78.50,
+                description: "Feito com leite de búfala, textura macia e sabor característico.",
+                category: "artesanal",
+                weight: "300g",
+                icon: "🐃"
+            },
+            {
+                id: 13,
+                name: "Queijo Cabra",
+                price: 82.90,
+                description: "Queijo feito com leite de cabra, sabor único e textura cremosa.",
+                category: "artesanal",
+                weight: "250g",
+                icon: "🐐"
+            },
+            {
+                id: 14,
+                name: "Queijo com Pimenta",
+                price: 45.80,
+                description: "Queijo minas com pimenta calabresa, picante na medida certa.",
+                category: "artesanal",
+                weight: "500g",
+                icon: "🌶️"
+            },
+            {
+                id: 15,
+                name: "Queijo Defumado",
+                price: 52.40,
+                description: "Queijo com sabor defumado característico, perfeito para petiscos.",
+                category: "artesanal",
+                weight: "500g",
+                icon: "🌫️"
+            }
+        ];
         
         // Elementos
         const cheeseForm = document.getElementById('cheeseForm');
@@ -190,22 +367,68 @@
                 return;
             }
             
-            // Ordenar por ID (mais recentes primeiro)
-            const sortedCheeses = [...cheeses].sort((a, b) => b.id - a.id);
+            // Agrupar por categoria
+            const groupedCheeses = {
+                nacional: [],
+                importado: [],
+                artesanal: []
+            };
             
-            sortedCheeses.forEach(cheese => {
-                const item = document.createElement('div');
-                item.className = 'cheese-item';
-                item.innerHTML = `
-                    <strong>${cheese.icon || '🧀'} ${cheese.name}</strong>
-                    <br>
-                    <small>${cheese.description}</small>
-                    <br>
-                    <strong style="color:#D2691E;">R$ ${cheese.price.toFixed(2)}</strong>
-                    <button class="delete-btn" onclick="deleteCheese(${cheese.id})">🗑️ Excluir</button>
-                `;
-                
-                cheeseList.appendChild(item);
+            cheeses.forEach(cheese => {
+                if (groupedCheeses[cheese.category]) {
+                    groupedCheeses[cheese.category].push(cheese);
+                }
+            });
+            
+            // Ordenar por ID (mais recentes primeiro)
+            Object.keys(groupedCheeses).forEach(category => {
+                groupedCheeses[category].sort((a, b) => b.id - a.id);
+            });
+            
+            // Nome das categorias
+            const categoryNames = {
+                'nacional': '🇧🇷 Nacionais',
+                'importado': '🌍 Importados',
+                'artesanal': '👨‍🍳 Artesanais'
+            };
+            
+            // Exibir por categoria
+            Object.keys(categoryNames).forEach(category => {
+                if (groupedCheeses[category].length > 0) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.style.marginBottom = '30px';
+                    
+                    const categoryTitle = document.createElement('h3');
+                    categoryTitle.style.color = '#8B4513';
+                    categoryTitle.style.marginBottom = '15px';
+                    categoryTitle.style.paddingBottom = '10px';
+                    categoryTitle.style.borderBottom = '2px solid #f0f0f0';
+                    categoryTitle.textContent = `${categoryNames[category]} (${groupedCheeses[category].length})`;
+                    
+                    categoryDiv.appendChild(categoryTitle);
+                    
+                    groupedCheeses[category].forEach(cheese => {
+                        const item = document.createElement('div');
+                        item.className = 'cheese-item';
+                        item.innerHTML = `
+                            <strong>${cheese.icon || '🧀'} ${cheese.name}</strong>
+                            <span class="category-badge category-${cheese.category}">
+                                ${cheese.category === 'nacional' ? 'Nacional' : 
+                                  cheese.category === 'importado' ? 'Importado' : 'Artesanal'}
+                            </span>
+                            <br>
+                            <small>${cheese.description}</small>
+                            <br>
+                            ${cheese.weight ? `<small><strong>Peso:</strong> ${cheese.weight}</small><br>` : ''}
+                            <strong style="color:#D2691E;">R$ ${cheese.price.toFixed(2)}</strong>
+                            <button class="delete-btn" onclick="deleteCheese(${cheese.id})">🗑️ Excluir</button>
+                        `;
+                        
+                        categoryDiv.appendChild(item);
+                    });
+                    
+                    cheeseList.appendChild(categoryDiv);
+                }
             });
             
             cheeseCount.textContent = cheeses.length;
@@ -218,9 +441,11 @@
             const name = document.getElementById('cheeseName').value.trim();
             const price = parseFloat(document.getElementById('cheesePrice').value);
             const description = document.getElementById('cheeseDescription').value.trim();
+            const category = document.getElementById('cheeseCategory').value;
+            const weight = document.getElementById('cheeseWeight').value.trim();
             const icon = document.getElementById('cheeseIcon').value.trim();
             
-            if (!name || isNaN(price) || !description) {
+            if (!name || isNaN(price) || !description || !category) {
                 showNotification('Preencha todos os campos obrigatórios', 'error');
                 return;
             }
@@ -234,6 +459,8 @@
                 name,
                 price,
                 description,
+                category,
+                weight: weight || '500g',
                 icon: icon || '🧀'
             });
             
@@ -245,6 +472,7 @@
             
             // Limpar formulário
             cheeseForm.reset();
+            document.getElementById('cheeseCategory').value = '';
             
             // Notificar
             showNotification('Queijo adicionado com sucesso!');
@@ -258,6 +486,60 @@
             localStorage.setItem('chavesQueijosCheeses', JSON.stringify(cheeses));
             loadCheeses();
             showNotification('Queijo excluído', 'error');
+        }
+        
+        // Exportar queijos
+        function exportCheeses() {
+            const data = JSON.stringify(cheeses, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `queijos_chaves_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            showNotification('Queijos exportados com sucesso!');
+        }
+        
+        // Importar queijos
+        function importCheeses() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const importedCheeses = JSON.parse(e.target.result);
+                        
+                        if (Array.isArray(importedCheeses)) {
+                            // Adicionar novos IDs
+                            importedCheeses.forEach(cheese => {
+                                cheese.id = cheeses.length > 0 ? Math.max(...cheeses.map(c => c.id)) + 1 : 1;
+                                cheeses.push(cheese);
+                            });
+                            
+                            localStorage.setItem('chavesQueijosCheeses', JSON.stringify(cheeses));
+                            loadCheeses();
+                            showNotification(`${importedCheeses.length} queijos importados com sucesso!`);
+                        } else {
+                            showNotification('Formato de arquivo inválido', 'error');
+                        }
+                    } catch (error) {
+                        showNotification('Erro ao importar arquivo', 'error');
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
         }
         
         // Inicializar

@@ -1221,65 +1221,6 @@
             return methods[method] || method;
         }
         
-        // Gerar mensagem para WhatsApp
-        function generateWhatsAppMessage(orderData) {
-            let message = `*🛒 NOVO PEDIDO - CHAVES CASA DE QUEIJOS*%0A%0A`;
-            message += `*Pedido:* #${orderData.id}%0A`;
-            message += `*Data:* ${orderData.date}%0A%0A`;
-            
-            message += `*👤 CLIENTE*%0A`;
-            message += `Nome: ${orderData.customer.name}%0A`;
-            message += `Telefone: ${orderData.customer.phone}%0A`;
-            message += `Tipo: ${orderData.customer.type === 'delivery' ? 'Entrega' : 'Retirada na Loja'}%0A`;
-            
-            if (orderData.customer.type === 'delivery') {
-                message += `Endereço: ${orderData.customer.address}%0A`;
-                message += `Bairro: ${orderData.customer.neighborhood}%0A`;
-                if (orderData.customer.complement) {
-                    message += `Complemento: ${orderData.customer.complement}%0A`;
-                }
-            } else {
-                message += `Retirar na loja: Rua Benedicto José de Moraes, 60%0A`;
-                message += `Chácara Belo Horizonte, Taubaté/SP%0A`;
-            }
-            
-            message += `%0A*📦 ITENS DO PEDIDO*%0A`;
-            orderData.items.forEach((item, index) => {
-                const itemTotal = item.price * item.quantity;
-                message += `${index + 1}. ${item.icon} ${item.name}%0A`;
-                message += `   Quantidade: ${item.quantity}%0A`;
-                message += `   Preço: R$ ${item.price.toFixed(2)}%0A`;
-                message += `   Subtotal: R$ ${itemTotal.toFixed(2)}%0A%0A`;
-            });
-            
-            message += `*💰 RESUMO FINANCEIRO*%0A`;
-            message += `Subtotal: R$ ${orderData.subtotal.toFixed(2)}%0A`;
-            
-            if (orderData.deliveryFee > 0) {
-                message += `Frete (Taubaté): R$ ${orderData.deliveryFee.toFixed(2)}%0A`;
-            }
-            
-            if (orderData.discount > 0) {
-                message += `Desconto (5%): -R$ ${orderData.discount.toFixed(2)}%0A`;
-            }
-            
-            message += `*TOTAL: R$ ${orderData.total.toFixed(2)}*%0A%0A`;
-            
-            message += `*💳 FORMA DE PAGAMENTO*%0A`;
-            message += `${getPaymentMethodName(orderData.paymentMethod)}%0A%0A`;
-            
-            message += `*⏰ PRAZO*%0A`;
-            message += `Pedido será enviado em até 2 dias úteis após confirmação.%0A%0A`;
-            
-            message += `*📍 ENTREGA*%0A`;
-            message += `Entregas somente em Taubaté.%0A`;
-            message += `Para outras cidades, favor entrar em contato.%0A%0A`;
-            
-            message += `_Pedido gerado via site_`;
-            
-            return message;
-        }
-        
         // Configurar eventos de clique para entrega/retirada
         document.querySelectorAll('.delivery-option').forEach(option => {
             option.addEventListener('click', function() {
@@ -1308,11 +1249,19 @@
         });
         
         // Evento para o botão de enviar pedido
-        submitOrderBtn.addEventListener('click', function() {
+        submitOrderBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log("Botão de pedido clicado");
+            console.log("Dados do formulário:");
+            console.log("Nome retirada:", document.getElementById('pickupName').value);
+            console.log("Telefone retirada:", document.getElementById('pickupPhone').value);
+            console.log("Nome entrega:", document.getElementById('deliveryName').value);
+            console.log("Endereço:", document.getElementById('deliveryAddress').value);
+            console.log("Itens no carrinho:", cart);
             processOrder();
         });
         
-        // Função principal para processar o pedido
+        // Função principal para processar o pedido - CORRIGIDA
         function processOrder() {
             console.log("Processando pedido...");
             
@@ -1323,8 +1272,10 @@
             }
             
             // Determinar tipo de entrega
-            const isDelivery = document.querySelector('.delivery-option.selected').dataset.type === 'delivery';
-            const paymentMethod = document.querySelector('.payment-option.selected').dataset.method;
+            const selectedDelivery = document.querySelector('.delivery-option.selected');
+            const isDelivery = selectedDelivery.dataset.type === 'delivery';
+            const selectedPayment = document.querySelector('.payment-option.selected');
+            const paymentMethod = selectedPayment.dataset.method;
             const hasDiscount = (paymentMethod === 'pix' || paymentMethod === 'cash');
             
             let customerInfo = {};
@@ -1350,7 +1301,7 @@
                     phone: phone,
                     address: address,
                     neighborhood: neighborhood,
-                    complement: document.getElementById('deliveryComplement').value.trim()
+                    complement: document.getElementById('deliveryComplement').value.trim() || ''
                 };
             } else {
                 // Validação para retirada
@@ -1367,7 +1318,9 @@
                 customerInfo = {
                     type: 'pickup',
                     name: name,
-                    phone: phone
+                    phone: phone,
+                    address: "Rua Benedicto José de Moraes, 60",
+                    neighborhood: "Chácara Belo Horizonte, Taubaté/SP"
                 };
             }
             
@@ -1377,30 +1330,112 @@
             const discount = hasDiscount ? subtotal * 0.05 : 0;
             const total = subtotal + deliveryFee - discount;
             
-            // Criar objeto do pedido
+            // Criar objeto do pedido com TODOS os dados
             currentOrder = {
                 id: generateOrderNumber(),
                 customer: customerInfo,
-                items: [...cart],
+                items: cart.map(item => ({
+                    ...item,
+                    itemTotal: item.price * item.quantity
+                })),
                 subtotal: subtotal,
                 deliveryFee: deliveryFee,
                 discount: discount,
                 total: total,
                 paymentMethod: paymentMethod,
+                paymentMethodName: getPaymentMethodName(paymentMethod),
                 hasDiscount: hasDiscount,
                 date: new Date().toLocaleString('pt-BR'),
+                timestamp: new Date().getTime(),
                 status: 'pendente'
             };
             
-            console.log("Pedido criado:", currentOrder);
+            console.log("Pedido criado COMPLETO:", currentOrder);
+            console.log("Itens no carrinho:", cart);
             
             // Salvar pedido no localStorage (para histórico)
             const orders = JSON.parse(localStorage.getItem('chavesQueijosOrders')) || [];
             orders.push(currentOrder);
             localStorage.setItem('chavesQueijosOrders', JSON.stringify(orders));
             
+            // Testar a mensagem antes de enviar
+            const testMessage = generateWhatsAppMessage(currentOrder);
+            console.log("Mensagem gerada:", decodeURIComponent(testMessage));
+            
             // Enviar para WhatsApp
             sendOrderToWhatsApp();
+        }
+        
+        // Função para gerar mensagem para WhatsApp - CORRIGIDA
+        function generateWhatsAppMessage(orderData) {
+            console.log("Gerando mensagem para pedido:", orderData);
+            
+            let message = `*🛒 NOVO PEDIDO - CHAVES CASA DE QUEIJOS*\n\n`;
+            message += `*Pedido:* #${orderData.id}\n`;
+            message += `*Data:* ${orderData.date}\n\n`;
+            
+            message += `*👤 DADOS DO CLIENTE*\n`;
+            message += `Nome: ${orderData.customer.name}\n`;
+            message += `Telefone: ${orderData.customer.phone}\n`;
+            message += `Tipo: ${orderData.customer.type === 'delivery' ? 'Entrega' : 'Retirada na Loja'}\n`;
+            
+            if (orderData.customer.type === 'delivery') {
+                message += `Endereço: ${orderData.customer.address}\n`;
+                message += `Bairro: ${orderData.customer.neighborhood}\n`;
+                if (orderData.customer.complement) {
+                    message += `Complemento: ${orderData.customer.complement}\n`;
+                }
+            } else {
+                message += `Local de retirada: ${orderData.customer.address}\n`;
+                message += `${orderData.customer.neighborhood}\n`;
+            }
+            
+            message += `\n*📦 ITENS DO PEDIDO*\n`;
+            
+            // Verificar se há itens
+            if (!orderData.items || orderData.items.length === 0) {
+                message += `Nenhum item no pedido\n`;
+            } else {
+                orderData.items.forEach((item, index) => {
+                    const itemTotal = item.price * item.quantity;
+                    message += `${index + 1}. ${item.icon || '📦'} ${item.name}\n`;
+                    message += `   Quantidade: ${item.quantity} ${item.weight || ''}\n`;
+                    message += `   Preço unitário: R$ ${item.price.toFixed(2)}\n`;
+                    message += `   Subtotal: R$ ${itemTotal.toFixed(2)}\n\n`;
+                });
+            }
+            
+            message += `*💰 RESUMO FINANCEIRO*\n`;
+            message += `Subtotal: R$ ${orderData.subtotal.toFixed(2)}\n`;
+            
+            if (orderData.deliveryFee > 0) {
+                message += `Frete (Taubaté): R$ ${orderData.deliveryFee.toFixed(2)}\n`;
+            }
+            
+            if (orderData.discount > 0) {
+                message += `Desconto (5%): -R$ ${orderData.discount.toFixed(2)}\n`;
+            }
+            
+            message += `*TOTAL: R$ ${orderData.total.toFixed(2)}*\n\n`;
+            
+            message += `*💳 FORMA DE PAGAMENTO*\n`;
+            message += `${orderData.paymentMethodName || getPaymentMethodName(orderData.paymentMethod)}\n\n`;
+            
+            message += `*⏰ PRAZO DE ENTREGA*\n`;
+            message += `Pedido será enviado em até 2 dias úteis após confirmação.\n\n`;
+            
+            message += `*📍 INFORMAÇÕES ADICIONAIS*\n`;
+            if (orderData.customer.type === 'delivery') {
+                message += `Entrega somente em Taubaté.\n`;
+            } else {
+                message += `Retirada na loja durante horário comercial.\n`;
+            }
+            message += `Para outras cidades, favor entrar em contato.\n\n`;
+            
+            message += `_Pedido gerado via site_`;
+            
+            // Substituir quebras de linha por %0A para URL do WhatsApp
+            return encodeURIComponent(message).replace(/\n/g, '%0A');
         }
         
         // Função para enviar pedido para WhatsApp
@@ -1446,6 +1481,9 @@
                 
                 // Atualizar resumo (para mostrar R$ 0,00)
                 updateOrderSummary();
+                
+                // Resetar currentOrder
+                currentOrder = null;
             }, 2000);
         }
         
@@ -1460,6 +1498,8 @@
         
         // Inicializar
         document.addEventListener('DOMContentLoaded', () => {
+            console.log("Site carregado. Itens no carrinho inicial:", cart);
+            
             // Carregar produtos
             displayProducts('all');
             

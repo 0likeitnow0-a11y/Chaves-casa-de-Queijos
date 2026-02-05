@@ -700,14 +700,13 @@
                 <span>Entrega (Taubaté):</span>
                 <span id="deliveryAmount">R$ 3,00</span>
             </div>
-        
             <div class="total-row total-amount">
                 <span>TOTAL:</span>
                 <span id="totalAmount">R$ 0,00</span>
             </div>
         </div>
         
-        <button class="btn" onclick="openCheckout()" style="width: 100%;" id="checkoutBtn">
+        <button class="btn" onclick="openCheckout()" style="width: 100%;" id="checkoutBtn" disabled>
             📝 Finalizar Pedido
         </button>
     </div>
@@ -726,7 +725,6 @@
                     <p>• Entregas somente em Taubaté - R$ 3,00</p>
                     <p>• Para outras cidades, favor entrar em contato</p>
                     <p>• Pedido será enviado em até 2 dias úteis</p>
-                    <p>• PIX/Dinheiro: 5% de desconto no total</p>
                 </div>
                 
                 <form id="orderForm">
@@ -779,10 +777,10 @@
                     <h4>3. Forma de Pagamento</h4>
                     <div class="payment-options">
                         <div class="payment-option selected" data-method="pix" id="pixOption">
-                            💰 PIX (5% desc.)
+                            💰 PIX
                         </div>
                         <div class="payment-option" data-method="cash" id="cashOption">
-                            💵 Dinheiro (5% desc.)
+                            💵 Dinheiro
                         </div>
                     </div>
                     
@@ -796,10 +794,6 @@
                         <div class="summary-row" id="summaryDeliveryRow" style="display:none;">
                             <span>Frete (Taubaté):</span>
                             <span id="summaryDelivery">R$ 3,00</span>
-                        </div>
-                        <div class="summary-row" id="summaryDiscountRow" style="display:none;">
-                            <span>Desconto (5%):</span>
-                            <span id="summaryDiscount">-R$ 0,00</span>
                         </div>
                         <div class="summary-row summary-total">
                             <span>TOTAL:</span>
@@ -886,7 +880,6 @@
 
         // Dados do carrinho
         let cart = [];
-        let currentOrder = null;
         
         // Elementos DOM
         const productsGrid = document.getElementById('productsGrid');
@@ -895,9 +888,6 @@
         const cartItems = document.getElementById('cartItems');
         const checkoutModal = document.getElementById('checkoutModal');
         const deliveryRow = document.getElementById('deliveryRow');
-        const discountRow = document.getElementById('discountRow');
-        const deliveryAmount = document.getElementById('deliveryAmount');
-        const discountAmount = document.getElementById('discountAmount');
         const subtotalAmount = document.getElementById('subtotalAmount');
         const totalAmount = document.getElementById('totalAmount');
         const checkoutBtn = document.getElementById('checkoutBtn');
@@ -1003,12 +993,13 @@
                 subtotalAmount.textContent = 'R$ 0,00';
                 totalAmount.textContent = 'R$ 0,00';
                 deliveryRow.style.display = 'none';
-                discountRow.style.display = 'none';
                 checkoutBtn.disabled = true;
+                checkoutBtn.textContent = '📝 Finalizar Pedido';
                 return;
             }
             
             checkoutBtn.disabled = false;
+            checkoutBtn.textContent = `📝 Finalizar Pedido (${totalItems} itens)`;
             
             cart.forEach(item => {
                 const itemDiv = document.createElement('div');
@@ -1029,11 +1020,10 @@
                 cartItems.appendChild(itemDiv);
             });
             
-            // Atualizar totais no carrinho (sem desconto inicial)
+            // Atualizar totais no carrinho (SEM DESCONTO)
             subtotalAmount.textContent = `R$ ${subtotal.toFixed(2)}`;
             totalAmount.textContent = `R$ ${subtotal.toFixed(2)}`;
             deliveryRow.style.display = 'none';
-            discountRow.style.display = 'none';
             
             // Salvar no localStorage
             localStorage.setItem('chavesCart', JSON.stringify(cart));
@@ -1069,10 +1059,7 @@
             const subtotal = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
             const isDelivery = document.querySelector('.delivery-option.selected').dataset.type === 'delivery';
             const deliveryFee = isDelivery ? 3.00 : 0;
-            const paymentMethod = document.querySelector('.payment-option.selected').dataset.method;
-            const hasDiscount = (paymentMethod === 'pix' || paymentMethod === 'cash');
-            const discount = hasDiscount ? subtotal * 0.05 : 0;
-            const total = subtotal + deliveryFee - discount;
+            const total = subtotal + deliveryFee;
             
             // Itens do pedido
             const itemsDiv = document.getElementById('orderSummaryItems');
@@ -1088,15 +1075,13 @@
                 itemsDiv.appendChild(itemDiv);
             });
             
-            // Valores
+            // Valores (SEM DESCONTO)
             document.getElementById('summarySubtotal').textContent = `R$ ${subtotal.toFixed(2)}`;
             document.getElementById('summaryDelivery').textContent = `R$ ${deliveryFee.toFixed(2)}`;
-            document.getElementById('summaryDiscount').textContent = `-R$ ${discount.toFixed(2)}`;
             document.getElementById('summaryTotal').textContent = `R$ ${total.toFixed(2)}`;
             
-            // Mostrar/ocultar linhas
+            // Mostrar/ocultar linha de frete
             document.getElementById('summaryDeliveryRow').style.display = isDelivery ? 'flex' : 'none';
-            document.getElementById('summaryDiscountRow').style.display = discount > 0 ? 'flex' : 'none';
             
             // Atualizar também no carrinho
             subtotalAmount.textContent = `R$ ${subtotal.toFixed(2)}`;
@@ -1104,16 +1089,9 @@
             
             if (isDelivery) {
                 deliveryRow.style.display = 'flex';
-                deliveryAmount.textContent = `R$ ${deliveryFee.toFixed(2)}`;
+                document.getElementById('deliveryAmount').textContent = `R$ ${deliveryFee.toFixed(2)}`;
             } else {
                 deliveryRow.style.display = 'none';
-            }
-            
-            if (discount > 0) {
-                discountRow.style.display = 'flex';
-                discountAmount.textContent = `-R$ ${discount.toFixed(2)}`;
-            } else {
-                discountRow.style.display = 'none';
             }
         }
 
@@ -1127,30 +1105,30 @@
             return `P${year}${month}${day}${random}`;
         }
 
-        // Nome do método de pagamento
+        // Nome do método de pagamento (SEM DESCONTO)
         function getPaymentMethodName(method) {
             const methods = {
-                'pix': 'PIX (5% de desconto)',
-                'cash': 'Dinheiro (5% de desconto)'
+                'pix': 'PIX',
+                'cash': 'Dinheiro'
             };
             return methods[method] || method;
         }
 
-        // Processar pedido CORRIGIDO
+        // Processar pedido
         function processOrder() {
             console.log("Processando pedido...");
             
             // Verificar se há itens no carrinho
             if (cart.length === 0) {
                 alert('Seu carrinho está vazio. Adicione itens antes de fazer o pedido.');
-                return;
+                return false;
             }
             
             // Determinar tipo de entrega
             const selectedDelivery = document.querySelector('.delivery-option.selected');
             if (!selectedDelivery) {
                 alert('Por favor, selecione o tipo de entrega.');
-                return;
+                return false;
             }
             
             const isDelivery = selectedDelivery.dataset.type === 'delivery';
@@ -1158,11 +1136,10 @@
             
             if (!selectedPayment) {
                 alert('Por favor, selecione a forma de pagamento.');
-                return;
+                return false;
             }
             
             const paymentMethod = selectedPayment.dataset.method;
-            const hasDiscount = (paymentMethod === 'pix' || paymentMethod === 'cash');
             
             let customerInfo = {};
             
@@ -1178,7 +1155,7 @@
                 
                 if (!name || !phone || !address || !neighborhood) {
                     alert('Por favor, preencha todos os campos obrigatórios para entrega!');
-                    return;
+                    return false;
                 }
                 
                 customerInfo = {
@@ -1197,7 +1174,7 @@
                 
                 if (!name || !phone) {
                     alert('Por favor, preencha seu nome e telefone para retirada!');
-                    return;
+                    return false;
                 }
                 
                 customerInfo = {
@@ -1209,44 +1186,45 @@
                 };
             }
             
-            // Calcular valores
+            // Calcular valores (SEM DESCONTO)
             const subtotal = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
             const deliveryFee = isDelivery ? 3.00 : 0;
-            const discount = hasDiscount ? subtotal * 0.05 : 0;
-            const total = subtotal + deliveryFee - discount;
+            const total = subtotal + deliveryFee; // SEM DESCONTO
             
             // Criar objeto do pedido
-            currentOrder = {
+            const orderData = {
                 id: generateOrderNumber(),
                 customer: customerInfo,
                 items: cart.map(item => ({
-                    ...item,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity || 1,
+                    weight: item.weight,
                     itemTotal: item.price * (item.quantity || 1)
                 })),
                 subtotal: subtotal,
                 deliveryFee: deliveryFee,
-                discount: discount,
                 total: total,
                 paymentMethod: paymentMethod,
                 paymentMethodName: getPaymentMethodName(paymentMethod),
-                hasDiscount: hasDiscount,
                 date: new Date().toLocaleString('pt-BR'),
                 timestamp: new Date().getTime(),
                 status: 'pendente'
             };
             
-            console.log("Pedido criado:", currentOrder);
+            console.log("Pedido criado:", orderData);
             
             // Salvar pedido no localStorage (para histórico)
             const orders = JSON.parse(localStorage.getItem('chavesQueijosOrders')) || [];
-            orders.push(currentOrder);
+            orders.push(orderData);
             localStorage.setItem('chavesQueijosOrders', JSON.stringify(orders));
             
             // Enviar para WhatsApp
-            sendOrderToWhatsApp();
+            sendOrderToWhatsApp(orderData);
+            return true;
         }
 
-        // Função para gerar mensagem para WhatsApp CORRIGIDA
+        // Função para gerar mensagem para WhatsApp
         function generateWhatsAppMessage(orderData) {
             console.log("Gerando mensagem para pedido:", orderData);
             
@@ -1288,14 +1266,10 @@
                 message += `Frete (Taubaté): R$ ${orderData.deliveryFee.toFixed(2)}\n`;
             }
             
-            if (orderData.discount > 0) {
-                message += `Desconto (5%): -R$ ${orderData.discount.toFixed(2)}\n`;
-            }
-            
             message += `*TOTAL: R$ ${orderData.total.toFixed(2)}*\n\n`;
             
             message += `*💳 FORMA DE PAGAMENTO*\n`;
-            message += `${orderData.paymentMethodName || getPaymentMethodName(orderData.paymentMethod)}\n\n`;
+            message += `${orderData.paymentMethodName}\n\n`;
             
             message += `*⏰ PRAZO DE ENTREGA*\n`;
             message += `Pedido será enviado em até 2 dias úteis após confirmação.\n\n`;
@@ -1314,15 +1288,15 @@
             return encodeURIComponent(message).replace(/\n/g, '%0A');
         }
 
-        // Enviar pedido para WhatsApp CORRIGIDO
-        function sendOrderToWhatsApp() {
-            if (!currentOrder) {
+        // Enviar pedido para WhatsApp
+        function sendOrderToWhatsApp(orderData) {
+            if (!orderData) {
                 alert('Erro: Nenhum pedido para enviar.');
                 return;
             }
             
             // Gerar mensagem para WhatsApp
-            const message = generateWhatsAppMessage(currentOrder);
+            const message = generateWhatsAppMessage(orderData);
             const phone = "5512997167799";
             
             // Criar URL do WhatsApp
@@ -1357,9 +1331,7 @@
                 // Atualizar resumo (para mostrar R$ 0,00)
                 updateOrderSummary();
                 
-                // Resetar currentOrder
-                currentOrder = null;
-            }, 2000);
+            }, 1000);
         }
 
         // Carregar carrinho salvo
@@ -1410,7 +1382,7 @@
                 });
             });
             
-            // Configurar eventos de pagamento (apenas PIX e Dinheiro)
+            // Configurar eventos de pagamento (SEM DESCONTO)
             const paymentOptions = document.querySelectorAll('.payment-option');
             paymentOptions.forEach(option => {
                 option.addEventListener('click', function() {
